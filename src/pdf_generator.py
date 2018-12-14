@@ -4,7 +4,7 @@ This Template has a separate console and file logging.
 File logging-level can be changed by -L parameter.
 Log file can be changed by -l parameter.
 Standard values for logging can be set in the config file
--> "Logging" 
+-> "Logging"
 ---> "logFile"
 ---> "logLevel"
 Console logging is INFO or DEBUG according to debug debug_flag.
@@ -24,6 +24,7 @@ PROGRAM_VERSION = '0.1'
 PROGRAM_DESCRIPTION = 'Generates a analysis PDF report'
 
 STANDARD_CONF_FILE = os.path.dirname(os.path.abspath(__file__)) + '/config/main.cfg'
+
 
 def _setup_argparser():
     parser = argparse.ArgumentParser(description='{} - {}'.format(PROGRAM_NAME, PROGRAM_DESCRIPTION))
