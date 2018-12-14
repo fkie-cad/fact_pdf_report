@@ -29,8 +29,8 @@ STANDARD_CONF_FILE = os.path.dirname(os.path.abspath(__file__)) + '/config/main.
 def _setup_argparser():
     parser = argparse.ArgumentParser(description='{} - {}'.format(PROGRAM_NAME, PROGRAM_DESCRIPTION))
     parser.add_argument('-V', '--version', action='version', version='{} {}'.format(PROGRAM_NAME, PROGRAM_VERSION))
-    parser.add_argument('-l', '--log_file', help='path to log file', default='./log/main.log')
-    parser.add_argument('-L', '--log_level', help='define the log level [DEBUG,INFO,WARNING,ERROR]', default='WARNING')
+    parser.add_argument('-l', '--log_file', help='path to log file')
+    parser.add_argument('-L', '--log_level', help='define the log level [DEBUG,INFO,WARNING,ERROR]')
     parser.add_argument('-d', '--debug', action='store_true', default=False, help='print debug messages')
     parser.add_argument('-C', '--config_file', help='set path to config File', default=STANDARD_CONF_FILE)
     return parser.parse_args()
