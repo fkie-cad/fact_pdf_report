@@ -1,0 +1,5 @@
+pytest
+pytest-pep8
+pytest-cov
+git+https://github.com/fkie-cad/common_helper_files.git
+git+https://github.com/fkie-cad/common_helper_process.git
