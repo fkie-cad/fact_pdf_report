@@ -1,9 +1,21 @@
 import jinja2
+import logging
 from pathlib import Path
 
 
 def generate_code(analysis_dict, output_path):
     jinja_env = _set_jinja_env()
+    _render_template(analysis_dict, jinja_env, 'meta_data')
+
+
+def _create_tex_files(analysis_dict, jinja_env):
+    module_list = list(analysis_dict['analysis'].keys())
+    module_list.append('meta_data')
+    for module in module_list:
+        try:
+            _render_template(analysis_dict, jinja_env, module)
+        except Exception as e:
+            logging.error('Could not generate tex file: {} -> {}'.format(type(Exception), e))
 
 
 def _set_jinja_env(templates_to_use='default'):
