@@ -71,10 +71,10 @@ def _load_config(args):
 
 if __name__ == '__main__':
     args = _setup_argparser()
-    print(args.config_file)
     config = _load_config(args)
     _setup_logging(config, args.debug)
+    logging.info(args.config_file)
 
-# insert your program here
+    # insert your program here
 
     sys.exit()

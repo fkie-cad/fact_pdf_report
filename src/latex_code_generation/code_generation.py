@@ -1,11 +1,17 @@
-import jinja2
 import logging
-import argparse
 import os
 from pathlib import Path
-from src.rest_import.rest import *
-# from web_interface.filter import byte_number_filter, nice_unix_time, nice_number_filter
-from src.jinja_filters.filter import *
+from tempfile import TemporaryDirectory
+import shutil
+import jinja2
+
+from common_helper_process import execute_shell_command_get_return_code
+
+from jinja_filters.filter import (
+    nice_unix_time, nice_number_filter, filter_latex_special_chars, count_elements_in_list,
+    convert_base64_to_png_filter, check_if_list_empty, split_hash, split_output_lines, byte_number_filter
+)
+from rest_import.rest import create_request_url, request_firmware_data
 
 
 def _set_jinja_env(templates_to_use='default'):
@@ -25,27 +31,30 @@ def _set_jinja_env(templates_to_use='default'):
     )
 
 
-def _setup_jinja_filters():
-    jinja_env = _set_jinja_env()
-    # jinja_env.filters['number_format'] = byte_number_filter
-    jinja_env.filters['nice_unix_time'] = nice_unix_time
-    jinja_env.filters['nice_number'] = nice_number_filter
-    jinja_env.filters['filter_chars'] = filter_latex_special_chars
-    jinja_env.filters['elements_count'] = count_elements_in_list
-    jinja_env.filters['base64_to_png'] = convert_base64_to_png_filter
-    jinja_env.filters['check_list'] = check_if_list_empty
-    jinja_env.filters['split_hash'] = split_hash
-    jinja_env.filters['split_output_lines'] = split_output_lines
+def _setup_jinja_filters(environment):
+    environment.filters['number_format'] = byte_number_filter
+    environment.filters['nice_unix_time'] = nice_unix_time
+    environment.filters['nice_number'] = nice_number_filter
+    environment.filters['filter_chars'] = filter_latex_special_chars
+    environment.filters['elements_count'] = count_elements_in_list
+    environment.filters['base64_to_png'] = convert_base64_to_png_filter
+    environment.filters['check_list'] = check_if_list_empty
+    environment.filters['split_hash'] = split_hash
+    environment.filters['split_output_lines'] = split_output_lines
 
 
-def generate_code(analysis_dict, output_path):
-    jinja_env = _set_jinja_env()
-    _render_template(analysis_dict, jinja_env, 'meta_data')
+def generate_meta_data_code(environment, meta_data):
+    template = environment.get_template('{}.tex'.format('meta_data'))
+    return template.render(meta_data=meta_data)
 
 
-def _render_template(data, jinja_env, template):
-    output = jinja_env.get_template('{}.tex'.format(template))
-    return output.render(analysis=data['analysis'], meta_data=data['meta_data'])
+def generate_analysis_codes(environment, analysis):
+    return [('{}.tex'.format(analysis_plugin), _render_analysis_result(analysis[analysis_plugin], environment, analysis_plugin)) for analysis_plugin in analysis]
+
+
+def _render_analysis_result(analysis, environment, analysis_plugin):
+    template = environment.get_template('{}.tex'.format(analysis_plugin))
+    return template.render(selected_analysis=analysis)
 
 
 def _create_tex_files(analysis_dict, jinja_env):
@@ -53,71 +62,45 @@ def _create_tex_files(analysis_dict, jinja_env):
     module_list.append('meta_data')
     for module in module_list:
         try:
-            _render_template(analysis_dict, jinja_env, module)
+            _render_analysis_result(analysis_dict, jinja_env, module)
         except Exception as e:
             logging.error('Could not generate tex file: {} -> {}'.format(type(Exception), e))
 
 
-def _write_file(raw_data, file_path):
-    with open(file_path, 'w') as fp:
-        fp.write(raw_data)
-
-
-def create_pdf_report(meta_data):
-    main_tex_filename = meta_data['device_name'] + "_Analysis_Report.tex"
+def create_report_filename(meta_data):
+    main_tex_filename = meta_data['device_name'] + "_analysis_report.pdf"
     main_tex_filename = main_tex_filename.replace(" ", "_")
-    main_tex_filename = main_tex_filename.replace("/", "__")
-    os.system("env buf_size=1000000 pdflatex " + main_tex_filename)
+    return main_tex_filename.replace("/", "__")
 
 
-def delete_unnecessary_files():
-    dir = "./"
-    dir_content = os.listdir(dir)
-
-    for file in dir_content:
-        if file.endswith(".tex"):
-            os.remove(os.path.join(dir, file))
-        elif file.endswith(".log"):
-            os.remove(os.path.join(dir, file))
-        elif file.endswith(".aux"):
-            os.remove(os.path.join(dir, file))
-        elif os.path.splitext(os.path.basename(file))[0] == "entropy_analysis_graph":
-            os.remove(os.path.join(dir, "entropy_analysis_graph.png"))
+def _copy_fact_image(target):
+    shutil.copy(Path(__file__).parent.parent / 'templates' / 'fact_logo.png', Path(target) / 'fact_logo.png')
 
 
-if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(description='PDF Genearator for the Firmware Analysis and Comparison Tool (FACT)')
-    argparser.add_argument('-s', '--summaries', default=False, help='Create a PDF report including summaries', dest="summary", action="store_false")
-    argparser.add_argument('-uid', '--uid', help='firmware analysis UID', dest="uid")
+def main(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba4832756_3801088"):
+    request_url = create_request_url(firmware_uid)
+    firmware_analyses, firmware_meta_data = request_firmware_data(request_url)
 
-    args = argparser.parse_args()
-    '''
-    if args.verbose:
-        logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-    else:
-        logging.basicConfig(level=logging.WARNING, stream=sys.stdout)
-    '''
-    # request_url = create_request_url(args.uid)
-    request_url = create_request_url()
-    firmware_dict = get_firmware(request_url)
-    firmware_meta_data = get_firmware_meta_data(firmware_dict)
-    firmware_analyses = get_firmware_analyses(firmware_dict)
+    jinja_environment = _set_jinja_env()
+    _setup_jinja_filters(environment=jinja_environment)
 
-    _set_jinja_env()
-    _setup_jinja_filters()
-    # create_pdf_report(firmware_meta_data)
-    delete_unnecessary_files()
-    '''
-    if args.summary:
-        pass
+    with TemporaryDirectory() as tmp_dir:
+        Path(tmp_dir, 'meta.tex').write_text(generate_meta_data_code(environment=jinja_environment, meta_data=firmware_meta_data))
+        for filename, result_code in generate_analysis_codes(environment=jinja_environment, analysis=firmware_analyses):
+            Path(tmp_dir, filename).write_text(result_code)
 
-    else:
+        # main_template_code = Path(Path(__file__).parent.parent, 'templates', 'default', 'main.tex').read_text()
+        template = jinja_environment.get_template('main.tex')
+        main_code = template.render(analysis=firmware_analyses, meta_data=firmware_meta_data)
+        Path(tmp_dir, 'main.tex').write_text(main_code)
+        pdf_filename = create_report_filename(firmware_meta_data)
 
-        setup_jinja_filters()
-        create_main_tex(meta_data, analysis)
-        create_meta_tex(meta_data)
-        create_analysis_texs_with_summary(analysis)
-        create_pdf_report(meta_data)
-        delete_generated_files()
-        print("Analysis report generated successfully.")
-    '''
+        _copy_fact_image(tmp_dir)
+
+        current_dir = os.getcwd()
+        os.chdir(tmp_dir)
+
+        output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex main.tex')
+
+        os.chdir(current_dir)
+        shutil.move(Path(tmp_dir, 'main.pdf'), Path('.', pdf_filename))

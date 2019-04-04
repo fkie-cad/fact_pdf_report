@@ -1,17 +1,16 @@
-#from common_helper_files import human_readable_file_size
-from time import localtime, strftime
 from base64 import decodebytes
+from time import localtime, strftime
 
-'''
-def byte_number_filter(i, verbose=True):
-    if isinstance(i, int) or isinstance(i, float):
+from common_helper_files import human_readable_file_size
+
+
+def byte_number_filter(number, verbose=True):
+    if isinstance(number, int) or isinstance(number, float):
         if verbose:
-            return '{} ({})'.format(human_readable_file_size(i), format(i, ',d') + ' bytes')
-        else:
-            return human_readable_file_size(i)
-    else:
-        return 'not available'
-'''
+            return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' bytes')
+        return human_readable_file_size(int(number))
+    return 'not available'
+
 
 def nice_unix_time(unix_time_stamp):
     '''
