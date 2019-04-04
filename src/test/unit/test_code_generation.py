@@ -1,6 +1,6 @@
 from tempfile import TemporaryDirectory
 from pathlib import Path
-from latex_code_generation.code_generation import _set_jinja_env, _render_analysis_result, _create_tex_files, main
+from latex_code_generation.code_generation import _set_jinja_env, _render_analysis_result, _create_tex_files, generate_pdf_report
 
 
 def test_render_template():
@@ -21,5 +21,5 @@ def test_create_tex_files():
 
 
 def test_main():
-    main(firmware_uid='b79ea608e2f0390744642bad472f8d9fd7e4713791857da5d5fcabf70a009e50_29626948')
+    generate_pdf_report(firmware_uid='b79ea608e2f0390744642bad472f8d9fd7e4713791857da5d5fcabf70a009e50_29626948')
 

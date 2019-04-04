@@ -18,6 +18,8 @@ import logging
 import os
 import sys
 
+from latex_code_generation.code_generation import generate_pdf_report
+
 
 PROGRAM_NAME = 'FACT PDF Report Generator'
 PROGRAM_VERSION = '0.1'
@@ -76,5 +78,6 @@ if __name__ == '__main__':
     logging.info(args.config_file)
 
     # insert your program here
+    generate_pdf_report(args.UID)
 
     sys.exit()

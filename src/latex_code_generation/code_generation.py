@@ -44,8 +44,14 @@ def _setup_jinja_filters(environment):
 
 
 def generate_meta_data_code(environment, meta_data):
-    template = environment.get_template('{}.tex'.format('meta_data'))
+    template = environment.get_template('meta_data.tex')
     return template.render(meta_data=meta_data)
+
+
+def generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment):
+    template = jinja_environment.get_template('main.tex')
+    return template.render(analysis=firmware_analyses, meta_data=firmware_meta_data)
+
 
 
 def generate_analysis_codes(environment, analysis):
@@ -77,7 +83,14 @@ def _copy_fact_image(target):
     shutil.copy(Path(__file__).parent.parent / 'templates' / 'fact_logo.png', Path(target) / 'fact_logo.png')
 
 
-def main(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba4832756_3801088"):
+def execute_pdflatex(tmp_dir):
+    current_dir = os.getcwd()
+    os.chdir(tmp_dir)
+    output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex main.tex')
+    os.chdir(current_dir)
+
+
+def generate_pdf_report(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba4832756_3801088"):
     request_url = create_request_url(firmware_uid)
     firmware_analyses, firmware_meta_data = request_firmware_data(request_url)
 
@@ -86,21 +99,15 @@ def main(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba
 
     with TemporaryDirectory() as tmp_dir:
         Path(tmp_dir, 'meta.tex').write_text(generate_meta_data_code(environment=jinja_environment, meta_data=firmware_meta_data))
+
         for filename, result_code in generate_analysis_codes(environment=jinja_environment, analysis=firmware_analyses):
             Path(tmp_dir, filename).write_text(result_code)
 
-        # main_template_code = Path(Path(__file__).parent.parent, 'templates', 'default', 'main.tex').read_text()
-        template = jinja_environment.get_template('main.tex')
-        main_code = template.render(analysis=firmware_analyses, meta_data=firmware_meta_data)
-        Path(tmp_dir, 'main.tex').write_text(main_code)
-        pdf_filename = create_report_filename(firmware_meta_data)
+        Path(tmp_dir, 'main.tex').write_text(generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment))
 
         _copy_fact_image(tmp_dir)
 
-        current_dir = os.getcwd()
-        os.chdir(tmp_dir)
+        execute_pdflatex(tmp_dir)
 
-        output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex main.tex')
-
-        os.chdir(current_dir)
+        pdf_filename = create_report_filename(firmware_meta_data)
         shutil.move(Path(tmp_dir, 'main.pdf'), Path('.', pdf_filename))
