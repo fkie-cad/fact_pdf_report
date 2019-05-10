@@ -35,6 +35,7 @@ def _setup_argparser():
     parser.add_argument('-L', '--log_level', help='define the log level [DEBUG,INFO,WARNING,ERROR]')
     parser.add_argument('-d', '--debug', action='store_true', default=False, help='print debug messages')
     parser.add_argument('-C', '--config_file', help='set path to config File', default=STANDARD_CONF_FILE)
+    parser.add_argument('-u', '--uid', help='firmware analysis UID', dest="UID")
     return parser.parse_args()
 
 

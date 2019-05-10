@@ -53,7 +53,6 @@ def generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment)
     return template.render(analysis=firmware_analyses, meta_data=firmware_meta_data)
 
 
-
 def generate_analysis_codes(environment, analysis):
     return [('{}.tex'.format(analysis_plugin), _render_analysis_result(analysis[analysis_plugin], environment, analysis_plugin)) for analysis_plugin in analysis]
 
@@ -90,7 +89,8 @@ def execute_pdflatex(tmp_dir):
     os.chdir(current_dir)
 
 
-def generate_pdf_report(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba4832756_3801088"):
+def generate_pdf_report(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba4832756_3801088"
+                                     ""):
     request_url = create_request_url(firmware_uid)
     firmware_analyses, firmware_meta_data = request_firmware_data(request_url)
 
