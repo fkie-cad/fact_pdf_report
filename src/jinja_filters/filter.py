@@ -1,4 +1,5 @@
 from base64 import decodebytes
+from pathlib import Path
 from time import localtime, strftime
 
 from common_helper_files import human_readable_file_size
@@ -36,42 +37,42 @@ def nice_number_filter(i):
 
 
 def filter_latex_special_chars(data):
-    if "\\" in data:
-        data = data.replace("\\", "")
-    if "$" in data:
-        data = data.replace("$", "\\$")
-    if "(" in data:
-        data = data.replace("(", "$($")
-    if ")" in data:
-        data = data.replace(")", "$)$")
-    if "[" in data:
-        data = data.replace("[", "$[$")
-    if "]" in data:
-        data = data.replace("]", "$]$")
-    if "#" in data:
-        data = data.replace("#", "\\#")
-    if "%" in data:
-        data = data.replace("%", "\\%")
-    if "&" in data:
-        data = data.replace("&", "\\&")
-    if "_" in data:
-        data = data.replace("_", "\\_")
-    if "{" in data:
-        data = data.replace("{", "\\{")
-    if "}" in data:
-        data = data.replace("}", "\\}")
-    if "^" in data:
-        data = data.replace("^", "\\textasciicircum{}")
-    if "~" in data:
-        data = data.replace("~", "\\textasciitilde{}")
-    if ">" in data:
-        data = data.replace(">", "\\textgreater{}")
-    if "<" in data:
-        data = data.replace("<", "\\textless{}")
-    if "\n" in data:
-        data = data.replace("\n", "\\newline ")
-    if "\'" in data:
-        data = data.replace("\'", "")
+    if '\\' in data:
+        data = data.replace('\\', '')
+    if '$' in data:
+        data = data.replace('$', '\\$')
+    if '(' in data:
+        data = data.replace('(', '$($')
+    if ')' in data:
+        data = data.replace(')', '$)$')
+    if '[' in data:
+        data = data.replace('[', '$[$')
+    if ']' in data:
+        data = data.replace(']', '$]$')
+    if '#' in data:
+        data = data.replace('#', '\\#')
+    if '%' in data:
+        data = data.replace('%', '\\%')
+    if '&' in data:
+        data = data.replace('&', '\\&')
+    if '_' in data:
+        data = data.replace('_', '\\_')
+    if '{' in data:
+        data = data.replace('{', '\\{')
+    if '}' in data:
+        data = data.replace('}', '\\}')
+    if '^' in data:
+        data = data.replace('^', '\\textasciicircum{}')
+    if '~' in data:
+        data = data.replace('~', '\\textasciitilde{}')
+    if '>' in data:
+        data = data.replace('>', '\\textgreater{}')
+    if '<' in data:
+        data = data.replace('<', '\\textless{}')
+    if '\n' in data:
+        data = data.replace('\n', '\\newline ')
+    if '\'' in data:
+        data = data.replace('\'', '')
     return data
 
 
@@ -79,13 +80,10 @@ def count_elements_in_list(ls):
     return len(ls)
 
 
-def convert_base64_to_png_filter(s, filename):
-    base64_encoded = s.encode('utf-8')
-    png_filename = filename + ".png"
-    with open(png_filename, "wb") as fh:
-        fh.write(decodebytes(base64_encoded))
-
-    return png_filename
+def convert_base64_to_png_filter(base64_string, filename, directory):
+    file_path = Path(directory, filename + '.png')
+    file_path.write_bytes(decodebytes(base64_string.encode('utf-8')))
+    return str(file_path)
 
 
 def check_if_list_empty(ls):
@@ -108,8 +106,8 @@ def split_output_lines(output_value):
 
     for line in splited_lines:
         line_length = len(line)
-        # word_lengths.append(list(map(len, line.split(" "))))
+        # word_lengths.append(list(map(len, line.split(' '))))
         if line_length > 92:
             line = line[:92] + ' ' + line[92:]
-        output += line + "\n"
+        output += line + '\n'
     return output

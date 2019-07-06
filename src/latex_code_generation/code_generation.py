@@ -47,28 +47,31 @@ def _setup_jinja_filters(environment):
 
 def generate_meta_data_code(environment, meta_data):
     template = environment.get_template('meta_data.tex')
+    logging.debug('Rendering meta data')
     return template.render(meta_data=meta_data)
 
 
 def generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment):
     template = jinja_environment.get_template('main.tex')
+    logging.debug('Rendering main page')
     return template.render(analysis=firmware_analyses, meta_data=firmware_meta_data)
 
 
-def generate_analysis_codes(environment, analysis):
+def generate_analysis_codes(environment, analysis, tmp_dir):
     return [
-        ('{}.tex'.format(analysis_plugin), _render_analysis_result(analysis[analysis_plugin], environment, analysis_plugin)) for analysis_plugin in analysis
+        ('{}.tex'.format(analysis_plugin), _render_analysis_result(analysis[analysis_plugin], environment, analysis_plugin, tmp_dir)) for analysis_plugin in analysis
     ]
 
 
-def _render_analysis_result(analysis, environment, analysis_plugin):
+def _render_analysis_result(analysis, environment, analysis_plugin, tmp_dir):
     try:
         template = environment.get_template('{}.tex'.format(analysis_plugin))
     except jinja2.TemplateNotFound:
         logging.debug('Falling back on generic template for {}'.format(analysis_plugin))
         template = environment.get_template(GENERIC_TEMPLATE)
 
-    return template.render(selected_analysis=analysis)
+    logging.debug('Rendering {}'.format(analysis_plugin))
+    return template.render(selected_analysis=analysis, tmp_dir=tmp_dir)
 
 
 def _create_tex_files(analysis_dict, jinja_env):
@@ -94,7 +97,8 @@ def _copy_fact_image(target):
 def execute_pdflatex(tmp_dir):
     current_dir = os.getcwd()
     os.chdir(tmp_dir)
-    output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex main.tex')
+    logging.debug('Creating pdf file')
+    _, _ = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex main.tex')
     os.chdir(current_dir)
 
 
@@ -109,7 +113,7 @@ def generate_pdf_report(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c
     with TemporaryDirectory() as tmp_dir:
         Path(tmp_dir, 'meta.tex').write_text(generate_meta_data_code(environment=jinja_environment, meta_data=firmware_meta_data))
 
-        for filename, result_code in generate_analysis_codes(environment=jinja_environment, analysis=firmware_analyses):
+        for filename, result_code in generate_analysis_codes(environment=jinja_environment, analysis=firmware_analyses, tmp_dir=tmp_dir):
             Path(tmp_dir, filename).write_text(result_code)
 
         Path(tmp_dir, 'main.tex').write_text(generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment))
