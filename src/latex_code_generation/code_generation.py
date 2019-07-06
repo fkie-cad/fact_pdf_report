@@ -13,6 +13,8 @@ from jinja_filters.filter import (
 )
 from rest_import.rest import create_request_url, request_firmware_data
 
+GENERIC_TEMPLATE = 'generic.tex'
+
 
 def _set_jinja_env(templates_to_use='default'):
     template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
@@ -54,11 +56,18 @@ def generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment)
 
 
 def generate_analysis_codes(environment, analysis):
-    return [('{}.tex'.format(analysis_plugin), _render_analysis_result(analysis[analysis_plugin], environment, analysis_plugin)) for analysis_plugin in analysis]
+    return [
+        ('{}.tex'.format(analysis_plugin), _render_analysis_result(analysis[analysis_plugin], environment, analysis_plugin)) for analysis_plugin in analysis
+    ]
 
 
 def _render_analysis_result(analysis, environment, analysis_plugin):
-    template = environment.get_template('{}.tex'.format(analysis_plugin))
+    try:
+        template = environment.get_template('{}.tex'.format(analysis_plugin))
+    except jinja2.TemplateNotFound:
+        logging.debug('Falling back on generic template for {}'.format(analysis_plugin))
+        template = environment.get_template(GENERIC_TEMPLATE)
+
     return template.render(selected_analysis=analysis)
 
 
