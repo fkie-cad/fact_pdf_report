@@ -7,19 +7,19 @@
     \hline
 
     IPs v4
-    \BLOCK{for ip in selected_analysis['ips_v4'] | check_list}
+    \BLOCK{for ip in selected_analysis['ips_v4'] | check_list | filter_list}
         & \VAR{ip} \\
     \BLOCK{endfor}
     \hline
 
     IPs v6
-    \BLOCK{for ip in selected_analysis['ips_v6'] | check_list}
+    \BLOCK{for ip in selected_analysis['ips_v6'] | check_list | filter_list}
         & \VAR{ip} \\
     \BLOCK{endfor}
     \hline
 
     URIs
-    \BLOCK{for uri in selected_analysis['uris'] | check_list}
+    \BLOCK{for uri in selected_analysis['uris'] | check_list | filter_list}
         & \VAR{uri} \\
     \BLOCK{endfor}
     \hline

@@ -94,6 +94,12 @@ def check_if_list_empty(ls):
         return empty_ls
 
 
+def filter_chars_in_list(list_of_strings):
+    return [
+        filter_latex_special_chars(item) for item in list_of_strings
+    ]
+
+
 def split_hash(hash_value):
     if len(hash_value) > 61:
         hash_value = hash_value[:61] + ' ' + hash_value[61:]

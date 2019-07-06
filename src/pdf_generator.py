@@ -78,7 +78,6 @@ if __name__ == '__main__':
     _setup_logging(config, args.debug)
     logging.info(args.config_file)
 
-    # insert your program here
     generate_pdf_report(args.UID)
 
-    sys.exit()
+    sys.exit(0)

@@ -8,7 +8,7 @@ import jinja2
 from common_helper_process import execute_shell_command_get_return_code
 
 from jinja_filters.filter import (
-    nice_unix_time, nice_number_filter, filter_latex_special_chars, count_elements_in_list,
+    nice_unix_time, nice_number_filter, filter_latex_special_chars, count_elements_in_list, filter_chars_in_list,
     convert_base64_to_png_filter, check_if_list_empty, split_hash, split_output_lines, byte_number_filter
 )
 from rest_import.rest import create_request_url, request_firmware_data
@@ -41,6 +41,7 @@ def _setup_jinja_filters(environment):
     environment.filters['elements_count'] = count_elements_in_list
     environment.filters['base64_to_png'] = convert_base64_to_png_filter
     environment.filters['check_list'] = check_if_list_empty
+    environment.filters['filter_list'] = filter_chars_in_list
     environment.filters['split_hash'] = split_hash
     environment.filters['split_output_lines'] = split_output_lines
 
@@ -102,10 +103,13 @@ def execute_pdflatex(tmp_dir):
     os.chdir(current_dir)
 
 
-def generate_pdf_report(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c91e521b91d3bcba4832756_3801088"
-                                     ""):
+def generate_pdf_report(firmware_uid):
     request_url = create_request_url(firmware_uid)
-    firmware_analyses, firmware_meta_data = request_firmware_data(request_url)
+    try:
+        firmware_analyses, firmware_meta_data = request_firmware_data(request_url)
+    except KeyError:
+        logging.warning('No firmware found with UID {}'.format(firmware_uid))
+        return None
 
     jinja_environment = _set_jinja_env()
     _setup_jinja_filters(environment=jinja_environment)
@@ -124,3 +128,5 @@ def generate_pdf_report(firmware_uid="bab8d95fc42176abc9126393b6035e4012ebccc82c
 
         pdf_filename = create_report_filename(firmware_meta_data)
         shutil.move(Path(tmp_dir, 'main.pdf'), Path('.', pdf_filename))
+
+    return None
