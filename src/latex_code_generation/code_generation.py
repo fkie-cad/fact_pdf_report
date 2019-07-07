@@ -1,29 +1,28 @@
 import logging
 import os
+import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import shutil
+
 import jinja2
-
 from common_helper_process import execute_shell_command_get_return_code
-
 from jinja_filters.filter import (
-    nice_unix_time, nice_number_filter, filter_latex_special_chars, count_elements_in_list, filter_chars_in_list,
-    convert_base64_to_png_filter, check_if_list_empty, split_hash, split_output_lines, byte_number_filter
+    byte_number_filter, check_if_list_empty, convert_base64_to_png_filter, count_elements_in_list, filter_chars_in_list,
+    filter_latex_special_chars, nice_number_filter, nice_unix_time, split_hash, split_output_lines
 )
 from rest_import.rest import create_request_url, request_firmware_data
 
 GENERIC_TEMPLATE = 'generic.tex'
 
 
-def _set_jinja_env(templates_to_use='default'):
+def create_jinja_environment(templates_to_use='default'):
     template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
-    return jinja2.Environment(
-        block_start_string='\BLOCK{',
+    environment = jinja2.Environment(
+        block_start_string=r'\BLOCK{',
         block_end_string='}',
-        variable_start_string='\VAR{',
+        variable_start_string=r'\VAR{',
         variable_end_string='}',
-        comment_start_string='\#{',
+        comment_start_string=r'\#{',
         comment_end_string='}',
         line_statement_prefix='%%',
         line_comment_prefix='%#',
@@ -31,9 +30,11 @@ def _set_jinja_env(templates_to_use='default'):
         autoescape=False,
         loader=jinja2.FileSystemLoader(str(template_directory))
     )
+    _add_filters_to_jinja(environment)
+    return environment
 
 
-def _setup_jinja_filters(environment):
+def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = byte_number_filter
     environment.filters['nice_unix_time'] = nice_unix_time
     environment.filters['nice_number'] = nice_number_filter
@@ -75,20 +76,10 @@ def _render_analysis_result(analysis, environment, analysis_plugin, tmp_dir):
     return template.render(selected_analysis=analysis, tmp_dir=tmp_dir)
 
 
-def _create_tex_files(analysis_dict, jinja_env):
-    module_list = list(analysis_dict['analysis'].keys())
-    module_list.append('meta_data')
-    for module in module_list:
-        try:
-            _render_analysis_result(analysis_dict, jinja_env, module)
-        except Exception as e:
-            logging.error('Could not generate tex file: {} -> {}'.format(type(Exception), e))
-
-
 def create_report_filename(meta_data):
-    main_tex_filename = meta_data['device_name'] + "_analysis_report.pdf"
-    main_tex_filename = main_tex_filename.replace(" ", "_")
-    return main_tex_filename.replace("/", "__")
+    main_tex_filename = meta_data['device_name'] + '_analysis_report.pdf'
+    main_tex_filename = main_tex_filename.replace(' ', '_')
+    return main_tex_filename.replace('/', '__')
 
 
 def _copy_fact_image(target):
@@ -111,16 +102,15 @@ def generate_pdf_report(firmware_uid):
         logging.warning('No firmware found with UID {}'.format(firmware_uid))
         return None
 
-    jinja_environment = _set_jinja_env()
-    _setup_jinja_filters(environment=jinja_environment)
+    environment = create_jinja_environment()
 
     with TemporaryDirectory() as tmp_dir:
-        Path(tmp_dir, 'meta.tex').write_text(generate_meta_data_code(environment=jinja_environment, meta_data=firmware_meta_data))
+        Path(tmp_dir, 'meta.tex').write_text(generate_meta_data_code(environment=environment, meta_data=firmware_meta_data))
 
-        for filename, result_code in generate_analysis_codes(environment=jinja_environment, analysis=firmware_analyses, tmp_dir=tmp_dir):
+        for filename, result_code in generate_analysis_codes(environment=environment, analysis=firmware_analyses, tmp_dir=tmp_dir):
             Path(tmp_dir, filename).write_text(result_code)
 
-        Path(tmp_dir, 'main.tex').write_text(generate_main_code(firmware_analyses, firmware_meta_data, jinja_environment))
+        Path(tmp_dir, 'main.tex').write_text(generate_main_code(firmware_analyses, firmware_meta_data, environment))
 
         _copy_fact_image(tmp_dir)
 
