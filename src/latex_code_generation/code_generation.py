@@ -83,7 +83,7 @@ def create_report_filename(meta_data):
 
 
 def _copy_fact_image(target):
-    shutil.copy(Path(__file__).parent.parent / 'templates' / 'fact_logo.png', Path(target) / 'fact_logo.png')
+    shutil.copy(str(Path(__file__).parent.parent / 'templates' / 'fact_logo.png'), str(Path(target) / 'fact_logo.png'))
 
 
 def execute_pdflatex(tmp_dir):
@@ -117,6 +117,6 @@ def generate_pdf_report(firmware_uid):
         execute_pdflatex(tmp_dir)
 
         pdf_filename = create_report_filename(firmware_meta_data)
-        shutil.move(Path(tmp_dir, 'main.pdf'), Path('.', pdf_filename))
+        shutil.move(str(Path(tmp_dir, 'main.pdf')), str(Path('.', pdf_filename)))
 
     return None
