@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 from jinja2 import Environment, FileSystemLoader
-from latex_code_generation.code_generation import _add_filters_to_jinja, generate_meta_data_code
-from rest_import.rest import request_firmware_data
-
-from ..data.test_dict import test_dict
+from pdf_generator.pre_processing.rest import request_firmware_data
+from pdf_generator.tex_generation.code_generation import generate_meta_data_code
+from pdf_generator.tex_generation.template_engine import _add_filters_to_jinja
+from test.data.test_dict import TEST_DICT
 
 # pylint: disable=redefined-outer-name
 
@@ -29,19 +29,19 @@ def mock_environment():
         line_comment_prefix='%#',
         trim_blocks=True,
         autoescape=False,
-        loader=FileSystemLoader(str(Path(Path(__file__).parent.parent.parent, 'templates', 'default'))),
+        loader=FileSystemLoader(str(Path(Path(__file__).parent.parent.parent, 'pdf_generator', 'templates', 'default'))),
     )
     _add_filters_to_jinja(env)
     return env
 
 
 def test_anything_mocked(monkeypatch):
-    monkeypatch.setattr('rest_import.rest.requests.get', lambda x: MockResponse())
+    monkeypatch.setattr('pdf_generator.pre_processing.rest.requests.get', lambda x: MockResponse())
 
     anything = request_firmware_data('anything')
     assert anything
 
 
 def test_latex_code_generation(mock_environment):
-    result = generate_meta_data_code(mock_environment, test_dict)
+    result = generate_meta_data_code(mock_environment, TEST_DICT)
     assert result

@@ -1,4 +1,4 @@
-test_dict = {
+TEST_DICT = {
     "firmware": {
         "analysis": {
             "binwalk": {

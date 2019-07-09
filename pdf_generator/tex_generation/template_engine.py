@@ -2,6 +2,7 @@ from base64 import decodebytes
 from pathlib import Path
 from time import localtime, strftime
 
+import jinja2
 from common_helper_files import human_readable_file_size
 
 
@@ -117,3 +118,35 @@ def split_output_lines(output_value):
             line = line[:92] + ' ' + line[92:]
         output += line + '\n'
     return output
+
+
+def create_jinja_environment(templates_to_use='default'):
+    template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
+    environment = jinja2.Environment(
+        block_start_string=r'\BLOCK{',
+        block_end_string='}',
+        variable_start_string=r'\VAR{',
+        variable_end_string='}',
+        comment_start_string=r'\#{',
+        comment_end_string='}',
+        line_statement_prefix='%%',
+        line_comment_prefix='%#',
+        trim_blocks=True,
+        autoescape=False,
+        loader=jinja2.FileSystemLoader(str(template_directory))
+    )
+    _add_filters_to_jinja(environment)
+    return environment
+
+
+def _add_filters_to_jinja(environment):
+    environment.filters['number_format'] = byte_number_filter
+    environment.filters['nice_unix_time'] = nice_unix_time
+    environment.filters['nice_number'] = nice_number_filter
+    environment.filters['filter_chars'] = filter_latex_special_chars
+    environment.filters['elements_count'] = count_elements_in_list
+    environment.filters['base64_to_png'] = convert_base64_to_png_filter
+    environment.filters['check_list'] = check_if_list_empty
+    environment.filters['filter_list'] = filter_chars_in_list
+    environment.filters['split_hash'] = split_hash
+    environment.filters['split_output_lines'] = split_output_lines
