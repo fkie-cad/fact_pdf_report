@@ -1,3 +1,4 @@
+import logging
 from base64 import decodebytes
 from pathlib import Path
 from time import localtime, strftime
@@ -5,9 +6,11 @@ from time import localtime, strftime
 import jinja2
 from common_helper_files import human_readable_file_size
 
+GENERIC_TEMPLATE = 'generic.tex'
+
 
 def byte_number_filter(number, verbose=True):
-    if isinstance(number, int) or isinstance(number, float):
+    if isinstance(number, (int, float)):
         if verbose:
             return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' bytes')
         return human_readable_file_size(int(number))
@@ -19,25 +22,23 @@ def nice_unix_time(unix_time_stamp):
     input unix_time_stamp
     output string 'YYYY-MM-DD HH:MM:SS'
     '''
-    if isinstance(unix_time_stamp, float) or isinstance(unix_time_stamp, int):
+    if isinstance(unix_time_stamp, (int, float)):
         tmp = localtime(unix_time_stamp)
         return strftime('%Y-%m-%d %H:%M:%S', tmp)
-    else:
-        return unix_time_stamp
+    return unix_time_stamp
 
 
-def nice_number_filter(i):
-    if isinstance(i, int):
-        return '{:,}'.format(i)
-    elif isinstance(i, float):
-        return '{:,.2f}'.format(i)
-    elif i is None:
+def nice_number_filter(number):
+    if isinstance(number, int):
+        return '{:,}'.format(number)
+    if isinstance(number, float):
+        return '{:,.2f}'.format(number)
+    if number is None:
         return 'not available'
-    else:
-        return i
+    return number
 
 
-def filter_latex_special_chars(data):
+def filter_latex_special_chars(data):  # pylint: disable=too-complex,too-many-branches
     if '\\' in data:
         data = data.replace('\\', '')
     if '$' in data:
@@ -87,12 +88,8 @@ def convert_base64_to_png_filter(base64_string, filename, directory):
     return str(file_path)
 
 
-def check_if_list_empty(ls):
-    if ls:
-        return ls
-    else:
-        empty_ls = ['list is empty']
-        return empty_ls
+def check_if_list_empty(list_of_strings):
+    return list_of_strings if list_of_strings else ['list is empty']
 
 
 def filter_chars_in_list(list_of_strings):
@@ -150,3 +147,25 @@ def _add_filters_to_jinja(environment):
     environment.filters['filter_list'] = filter_chars_in_list
     environment.filters['split_hash'] = split_hash
     environment.filters['split_output_lines'] = split_output_lines
+
+
+class Engine:
+    def __init__(self, template_folder=None, tmp_dir=None):
+        self._environment = create_jinja_environment(template_folder if template_folder else 'default')
+        self._tmp_dir = tmp_dir
+
+    def render_main_template(self, analysis, meta_data):
+        template = self._environment.get_template('main.tex')
+        return template.render(analysis=analysis, meta_data=meta_data)
+
+    def render_meta_template(self, meta_data):
+        template = self._environment.get_template('meta_data.tex')
+        return template.render(meta_data=meta_data)
+
+    def render_analysis_template(self, plugin, analysis):
+        try:
+            template = self._environment.get_template('{}.tex'.format(plugin))
+        except jinja2.TemplateNotFound:
+            logging.warning('Falling back on generic template for {}'.format(plugin))
+            template = self._environment.get_template(GENERIC_TEMPLATE)
+        return template.render(selected_analysis=analysis, tmp_dir=self._tmp_dir)

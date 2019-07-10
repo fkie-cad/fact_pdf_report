@@ -1,10 +1,6 @@
-from pathlib import Path
-
 import pytest
-from jinja2 import Environment, FileSystemLoader
 from pdf_generator.pre_processing.rest import request_firmware_data
-from pdf_generator.tex_generation.code_generation import generate_meta_data_code
-from pdf_generator.tex_generation.template_engine import _add_filters_to_jinja
+from pdf_generator.tex_generation.template_engine import Engine
 from test.data.test_dict import TEST_DICT
 
 # pylint: disable=redefined-outer-name
@@ -17,22 +13,8 @@ class MockResponse:
 
 
 @pytest.fixture(scope='function')
-def mock_environment():
-    env = Environment(
-        block_start_string=r'\BLOCK{',
-        block_end_string='}',
-        variable_start_string=r'\VAR{',
-        variable_end_string='}',
-        comment_start_string=r'\#{',
-        comment_end_string='}',
-        line_statement_prefix='%%',
-        line_comment_prefix='%#',
-        trim_blocks=True,
-        autoescape=False,
-        loader=FileSystemLoader(str(Path(Path(__file__).parent.parent.parent, 'pdf_generator', 'templates', 'default'))),
-    )
-    _add_filters_to_jinja(env)
-    return env
+def stub_engine():
+    return Engine()
 
 
 def test_anything_mocked(monkeypatch):
@@ -42,6 +24,6 @@ def test_anything_mocked(monkeypatch):
     assert anything
 
 
-def test_latex_code_generation(mock_environment):
-    result = generate_meta_data_code(mock_environment, TEST_DICT)
+def test_latex_code_generation(stub_engine: Engine):
+    result = stub_engine.render_meta_template(TEST_DICT)
     assert result
