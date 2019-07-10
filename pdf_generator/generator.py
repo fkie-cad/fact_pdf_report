@@ -30,12 +30,12 @@ def create_report_filename(meta_data):
     return '{}_analysis_report.pdf'.format(meta_data['device_name'].replace(' ', '_').replace('/', '__'))
 
 
-def generate_report(firmware_uid):
-    request_url = create_request_url(firmware_uid)
+def generate_report(firmware_uid, server_url=None):
+    request_url = create_request_url(firmware_uid, server_url)
     try:
         analysis, meta_data = request_firmware_data(request_url)
-    except KeyError:
-        logging.warning('No firmware found with UID {}'.format(firmware_uid))
+    except RuntimeError as error:
+        logging.warning('No firmware found with UID {}: {}'.format(firmware_uid, error))
         return 1
 
     with TemporaryDirectory() as tmp_dir:
