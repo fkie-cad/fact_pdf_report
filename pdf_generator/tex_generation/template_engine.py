@@ -12,7 +12,7 @@ GENERIC_TEMPLATE = 'generic.tex'
 def byte_number_filter(number, verbose=True):
     if isinstance(number, (int, float)):
         if verbose:
-            return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' bytes')
+            return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' Byte')
         return human_readable_file_size(int(number))
     return 'not available'
 
@@ -25,7 +25,7 @@ def nice_unix_time(unix_time_stamp):
     if isinstance(unix_time_stamp, (int, float)):
         tmp = localtime(unix_time_stamp)
         return strftime('%Y-%m-%d %H:%M:%S', tmp)
-    return unix_time_stamp
+    return 'not available'
 
 
 def nice_number_filter(number):
@@ -33,9 +33,12 @@ def nice_number_filter(number):
         return '{:,}'.format(number)
     if isinstance(number, float):
         return '{:,.2f}'.format(number)
-    if number is None:
-        return 'not available'
-    return number
+    if isinstance(number, str):
+        try:
+            return str(int(number))
+        except ValueError:
+            pass
+    return 'not available'
 
 
 def filter_latex_special_chars(data):
@@ -65,18 +68,10 @@ def filter_latex_special_chars(data):
     return data
 
 
-def count_elements_in_list(ls):
-    return len(ls)
-
-
 def convert_base64_to_png_filter(base64_string, filename, directory):
     file_path = Path(directory, filename + '.png')
     file_path.write_bytes(decodebytes(base64_string.encode('utf-8')))
     return str(file_path)
-
-
-def check_if_list_empty(list_of_strings):
-    return list_of_strings if list_of_strings else ['list is empty']
 
 
 def filter_chars_in_list(list_of_strings):
@@ -85,22 +80,21 @@ def filter_chars_in_list(list_of_strings):
     ]
 
 
-def split_hash(hash_value):
-    if len(hash_value) > 61:
-        hash_value = hash_value[:61] + ' ' + hash_value[61:]
+def split_hash(hash_value, max_length=61):
+    if len(hash_value) > max_length:
+        hash_value = '{} {}'.format(hash_value[:max_length], hash_value[max_length:])
     return hash_value
 
 
-def split_output_lines(output_value):
-    splited_lines = output_value.splitlines()
+def split_output_lines(output_value, max_length=92):
+    lines = output_value.splitlines(keepends=True)
     output = ''
 
-    for line in splited_lines:
-        line_length = len(line)
-        # word_lengths.append(list(map(len, line.split(' '))))
-        if line_length > 92:
-            line = line[:92] + ' ' + line[92:]
-        output += line + '\n'
+    for line in lines:
+        if len(line) > max_length:
+            line = '{} {}'.format(line[:max_length], line[max_length:])
+        output += line
+
     return output
 
 
@@ -128,9 +122,9 @@ def _add_filters_to_jinja(environment):
     environment.filters['nice_unix_time'] = nice_unix_time
     environment.filters['nice_number'] = nice_number_filter
     environment.filters['filter_chars'] = filter_latex_special_chars
-    environment.filters['elements_count'] = count_elements_in_list
+    environment.filters['elements_count'] = len
     environment.filters['base64_to_png'] = convert_base64_to_png_filter
-    environment.filters['check_list'] = check_if_list_empty
+    environment.filters['check_list'] = lambda x: x if x else ['list is empty']
     environment.filters['filter_list'] = filter_chars_in_list
     environment.filters['split_hash'] = split_hash
     environment.filters['split_output_lines'] = split_output_lines
