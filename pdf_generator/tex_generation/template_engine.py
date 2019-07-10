@@ -38,43 +38,30 @@ def nice_number_filter(number):
     return number
 
 
-def filter_latex_special_chars(data):  # pylint: disable=too-complex,too-many-branches
-    if '\\' in data:
-        data = data.replace('\\', '')
-    if '$' in data:
-        data = data.replace('$', '\\$')
-    if '(' in data:
-        data = data.replace('(', '$($')
-    if ')' in data:
-        data = data.replace(')', '$)$')
-    if '[' in data:
-        data = data.replace('[', '$[$')
-    if ']' in data:
-        data = data.replace(']', '$]$')
-    if '#' in data:
-        data = data.replace('#', '\\#')
-    if '%' in data:
-        data = data.replace('%', '\\%')
-    if '&' in data:
-        data = data.replace('&', '\\&')
-    if '_' in data:
-        data = data.replace('_', '\\_')
-    if '{' in data:
-        data = data.replace('{', '\\{')
-    if '}' in data:
-        data = data.replace('}', '\\}')
-    if '^' in data:
-        data = data.replace('^', '\\textasciicircum{}')
-    if '~' in data:
-        data = data.replace('~', '\\textasciitilde{}')
-    if '>' in data:
-        data = data.replace('>', '\\textgreater{}')
-    if '<' in data:
-        data = data.replace('<', '\\textless{}')
-    if '\n' in data:
-        data = data.replace('\n', '\\newline ')
-    if '\'' in data:
-        data = data.replace('\'', '')
+def filter_latex_special_chars(data):
+    latex_character_escapes = {
+        '\\': '',
+        '$': '\\$',
+        '(': '$($',
+        ')': '$)$',
+        '[': '$[$',
+        ']': '$]$',
+        '#': '\\#',
+        '%': '\\%',
+        '&': '\\&',
+        '_': '\\_',
+        '{': '\\{',
+        '}': '\\}',
+        '^': '\\textasciicircum{}',
+        '~': '\\textasciitilde{}',
+        '>': '\\textgreater{}',
+        '<': '\\textless{}',
+        '\n': '\\newline ',
+        '\'': ''
+    }
+    for character, replacement in latex_character_escapes.items():
+        if character in data:
+            data = data.replace(character, replacement)
     return data
 
 
