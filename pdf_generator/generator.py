@@ -20,7 +20,7 @@ def copy_fact_image(target):
     shutil.copy(str(Path(__file__).parent / 'templates' / 'fact_logo.png'), str(Path(target) / 'fact_logo.png'))
 
 
-def generate_analysis_codes(engine, analysis):
+def generate_analysis_templates(engine, analysis):
     return [
         ('{}.tex'.format(analysis_plugin), engine.render_analysis_template(analysis_plugin, analysis[analysis_plugin])) for analysis_plugin in analysis
     ]
@@ -28,6 +28,21 @@ def generate_analysis_codes(engine, analysis):
 
 def create_report_filename(meta_data):
     return '{}_analysis_report.pdf'.format(meta_data['device_name'].replace(' ', '_').replace('/', '__'))
+
+
+def compile_pdf(meta_data, tmp_dir):
+    copy_fact_image(tmp_dir)
+    execute_latex(tmp_dir)
+    shutil.move(str(Path(tmp_dir, 'main.pdf')), str(Path(create_report_filename(meta_data))))
+
+
+def create_templates(analysis, meta_data, tmp_dir):
+    engine = Engine(tmp_dir=tmp_dir)
+
+    Path(tmp_dir, 'main.tex').write_text(engine.render_main_template(analysis=analysis, meta_data=meta_data))
+    Path(tmp_dir, 'meta.tex').write_text(engine.render_meta_template(meta_data))
+    for filename, result_code in generate_analysis_templates(engine=engine, analysis=analysis):
+        Path(tmp_dir, filename).write_text(result_code)
 
 
 def generate_report(firmware_uid, server_url=None):
@@ -39,19 +54,7 @@ def generate_report(firmware_uid, server_url=None):
         return 1
 
     with TemporaryDirectory() as tmp_dir:
-        engine = Engine(tmp_dir=tmp_dir)
-        Path(tmp_dir, 'meta.tex').write_text(engine.render_meta_template(meta_data))
-
-        for filename, result_code in generate_analysis_codes(engine=engine, analysis=analysis):
-            Path(tmp_dir, filename).write_text(result_code)
-
-        Path(tmp_dir, 'main.tex').write_text(engine.render_main_template(analysis=analysis, meta_data=meta_data))
-
-        copy_fact_image(tmp_dir)
-
-        execute_latex(tmp_dir)
-
-        pdf_filename = create_report_filename(meta_data)
-        shutil.move(str(Path(tmp_dir, 'main.pdf')), str(Path('.', pdf_filename)))
+        create_templates(analysis, meta_data, tmp_dir)
+        compile_pdf(meta_data, tmp_dir)
 
     return 0
