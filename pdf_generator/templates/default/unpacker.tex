@@ -19,17 +19,6 @@
         \hline
     \BLOCK{endif}
 
-    Size Packed -\textgreater{} Unpacked & \VAR{selected_analysis['size packed -> unpacked'] | filter_chars} \\
-    \hline
-
     Entropy & \VAR{selected_analysis['entropy'] | nice_number} \\
     \hline
-
-    \BLOCK{if selected_analysis['summary']}
-        Summary
-        \BLOCK{for selected_summary in selected_analysis['summary']}
-            & \VAR{selected_summary | filter_chars} \\
-        \BLOCK{endfor}
-        \hline
-    \BLOCK{endif}
 \end{longtable}

@@ -34,7 +34,7 @@
 \input{meta.tex}
 }
 
-\section*{Analyses}
+\section*{Analysis}
 
 \BLOCK{if "base64_decoder" in analysis}
     \subsection*{base64 decoder}
@@ -72,17 +72,11 @@
 \BLOCK{endif}
 
 \BLOCK{if "file_hashes" in analysis}
-    \subsection*{file hashes}
-    {\fontfamily{lmss}\selectfont
     \input{file_hashes.tex}
-    }
 \BLOCK{endif}
 
 \BLOCK{if "file_type" in analysis}
-    \subsection*{file type}
-    {\fontfamily{lmss}\selectfont
     \input{file_type.tex}
-    }
 \BLOCK{endif}
 
 \BLOCK{if "init_systems" in analysis}
