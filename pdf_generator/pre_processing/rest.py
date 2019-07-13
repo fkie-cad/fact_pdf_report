@@ -6,7 +6,7 @@ DEFAULT_URL = 'http://localhost:5000'
 
 
 def create_request_url(firmware_uid, server_url):
-    return '{}/rest/firmware/{}'.format(server_url if server_url else DEFAULT_URL, firmware_uid)
+    return '{}/rest/firmware/{}?summary=true'.format(server_url if server_url else DEFAULT_URL, firmware_uid)
 
 
 def request_firmware_data(request_url):

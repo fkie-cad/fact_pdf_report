@@ -98,6 +98,12 @@ def split_output_lines(output_value, max_length=92):
     return output
 
 
+def item_contains_string(item, string):
+    if not isinstance(item, str):
+        return False
+    return string in item
+
+
 def create_jinja_environment(templates_to_use='default'):
     template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
     environment = jinja2.Environment(
@@ -128,6 +134,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['filter_list'] = filter_chars_in_list
     environment.filters['split_hash'] = split_hash
     environment.filters['split_output_lines'] = split_output_lines
+    environment.filters['contains'] = item_contains_string
 
 
 class Engine:
