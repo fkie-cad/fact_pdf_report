@@ -33,6 +33,7 @@ def test_nice_number_filter():
     assert nice_number_filter('12') == '12'
 
 
+@pytest.mark.skip(reason='Since local time used, result is not stable')
 def test_nice_unix_time():
     assert nice_unix_time(None) == 'not available'
 

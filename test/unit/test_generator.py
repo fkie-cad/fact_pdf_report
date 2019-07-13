@@ -30,13 +30,13 @@ def exec_mock(*_, **__):
 def test_execute_latex(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.execute_shell_command_get_return_code', exec_mock)
 
-    execute_latex(tmpdir)
+    execute_latex(str(tmpdir))
     assert Path(tmpdir, 'test').exists()
     assert Path(tmpdir, 'test').read_text() == 'works'
 
 
 def test_copy_fact_image(tmpdir):
-    copy_fact_image(tmpdir)
+    copy_fact_image(str(tmpdir))
     assert Path(tmpdir, 'fact_logo.png').exists()
 
 
@@ -58,7 +58,7 @@ def test_create_analysis_templates():
 
 def test_create_templates(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.Engine', MockEngine)
-    create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=tmpdir)
+    create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=str(tmpdir))
 
     assert Path(tmpdir, 'main.tex').exists()
     assert Path(tmpdir, 'meta.tex').exists()
