@@ -33,5 +33,5 @@ def test_request_firmware_data_bad_response(monkeypatch):  # pylint: disable=inv
 
 
 def test_create_request_url():
-    assert create_request_url('X', None) == '{}/rest/firmware/X'.format(DEFAULT_URL)
-    assert create_request_url('X', 'Y') == 'Y/rest/firmware/X'
+    assert create_request_url('X', None) == '{}/rest/firmware/X?summary=true'.format(DEFAULT_URL)
+    assert create_request_url('X', 'Y') == 'Y/rest/firmware/X?summary=true'

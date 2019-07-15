@@ -123,6 +123,11 @@ def create_jinja_environment(templates_to_use='default'):
     return environment
 
 
+def plugin_name(name):
+    parts = name.split('_')
+    return ' '.join(('{}{}'.format(part[0:1].upper(), part[1:]) for part in parts))
+
+
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = byte_number_filter
     environment.filters['nice_unix_time'] = nice_unix_time
@@ -131,6 +136,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['elements_count'] = len
     environment.filters['base64_to_png'] = convert_base64_to_png_filter
     environment.filters['check_list'] = lambda x: x if x else ['list is empty']
+    environment.filters['plugin_name'] = plugin_name
     environment.filters['filter_list'] = filter_chars_in_list
     environment.filters['split_hash'] = split_hash
     environment.filters['split_output_lines'] = split_output_lines
@@ -156,4 +162,4 @@ class Engine:
         except jinja2.TemplateNotFound:
             logging.warning('Falling back on generic template for {}'.format(plugin))
             template = self._environment.get_template(GENERIC_TEMPLATE)
-        return template.render(selected_analysis=analysis, tmp_dir=self._tmp_dir)
+        return template.render(plugin_name=plugin, selected_analysis=analysis, tmp_dir=self._tmp_dir)
