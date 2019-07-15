@@ -37,93 +37,9 @@
 
 \section*{Analysis}
 
-\BLOCK{if "base64_decoder" in analysis}
-    \input{base64_decoder.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "binwalk" in analysis}
-    \input{binwalk.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "cpu_architecture" in analysis}
-    \input{cpu_architecture.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "crypto_material" in analysis}
-    \input{crypto_material.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "exploit_mitigations" in analysis}
-    \input{exploit_mitigations.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "file_hashes" in analysis}
-    \input{file_hashes.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "file_type" in analysis}
-    \input{file_type.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "init_systems" in analysis}
-    \input{init_systems.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "ip_and_uri_finder" in analysis}
-    \input{ip_and_uri_finder.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "software_components" in analysis}
-    \input{software_components.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "printable_strings" in analysis}
-    \input{printable_strings.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "users_and_passwords" in analysis}
-    \input{users_and_passwords.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "string_evaluator" in analysis}
-    \input{string_evaluator.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "unpacker" in analysis}
-    \input{unpacker.tex}
-\BLOCK{endif}
-
-\newpage
-
-\BLOCK{if "malware_scanner" in analysis}
-    \input{malware_scanner.tex}
-\BLOCK{endif}
+\BLOCK{for current_analysis in analysis}
+    \input{\VAR{current_analysis}.tex}
+    \newpage
+\BLOCK{endfor}
 
 \end{document}
-
