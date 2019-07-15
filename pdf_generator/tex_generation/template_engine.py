@@ -1,5 +1,6 @@
 import logging
 from base64 import decodebytes
+from collections import OrderedDict
 from pathlib import Path
 from time import localtime, strftime
 
@@ -42,26 +43,26 @@ def nice_number_filter(number):
 
 
 def filter_latex_special_chars(data):
-    latex_character_escapes = {
-        '\\': '',
-        '$': '\\$',
-        '(': '$($',
-        ')': '$)$',
-        '[': '$[$',
-        ']': '$]$',
-        '#': '\\#',
-        '%': '\\%',
-        '&': '\\&',
-        '_': '\\_',
-        '{': '\\{',
-        '}': '\\}',
-        '^': '\\textasciicircum{}',
-        '~': '\\textasciitilde{}',
-        '>': '\\textgreater{}',
-        '<': '\\textless{}',
-        '\n': '\\newline ',
-        '\'': ''
-    }
+    latex_character_escapes = OrderedDict()
+    latex_character_escapes['\\'] = ''
+    latex_character_escapes['\''] = ''
+    latex_character_escapes['$'] = '\\$'
+    latex_character_escapes['('] = '$($'
+    latex_character_escapes[')'] = '$)$'
+    latex_character_escapes['['] = '$[$',
+    latex_character_escapes[']'] = '$]$',
+    latex_character_escapes['#'] = '\\#'
+    latex_character_escapes['%'] = '\\%'
+    latex_character_escapes['&'] = '\\&'
+    latex_character_escapes['_'] = '\\_'
+    latex_character_escapes['{'] = '\\{'
+    latex_character_escapes['}'] = '\\}'
+    latex_character_escapes['^'] = '\\textasciicircum{}'
+    latex_character_escapes['~'] = '\\textasciitilde{}'
+    latex_character_escapes['>'] = '\\textgreater{}'
+    latex_character_escapes['<'] = '\\textless{}'
+    latex_character_escapes['\n'] = '\\newline '
+
     for character, replacement in latex_character_escapes.items():
         if character in data:
             data = data.replace(character, replacement)

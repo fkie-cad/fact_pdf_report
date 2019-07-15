@@ -31,13 +31,13 @@ def test_execute_latex(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.execute_shell_command_get_return_code', exec_mock)
 
     execute_latex(str(tmpdir))
-    assert Path(tmpdir, 'test').exists()
-    assert Path(tmpdir, 'test').read_text() == 'works'
+    assert Path(str(tmpdir), 'test').exists()
+    assert Path(str(tmpdir), 'test').read_text() == 'works'
 
 
 def test_copy_fact_image(tmpdir):
     copy_fact_image(str(tmpdir))
-    assert Path(tmpdir, 'fact_logo.png').exists()
+    assert Path(str(tmpdir), 'fact_logo.png').exists()
 
 
 def test_create_report_filename():
@@ -60,8 +60,8 @@ def test_create_templates(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.Engine', MockEngine)
     create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=str(tmpdir))
 
-    assert Path(tmpdir, 'main.tex').exists()
-    assert Path(tmpdir, 'meta.tex').exists()
-    assert Path(tmpdir, 'test.tex').exists()
+    assert Path(str(tmpdir), 'main.tex').exists()
+    assert Path(str(tmpdir), 'meta.tex').exists()
+    assert Path(str(tmpdir), 'test.tex').exists()
 
-    assert Path(tmpdir, 'test.tex').read_text() == '{"result": "data"}'
+    assert Path(str(tmpdir), 'test.tex').read_text() == '{"result": "data"}'
