@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import pytest
 from pdf_generator.generator import (
     copy_fact_image, create_report_filename, create_templates, execute_latex, render_analysis_templates
 )
@@ -40,10 +41,13 @@ def test_copy_fact_image(tmpdir):
     assert Path(str(tmpdir), 'fact_logo.png').exists()
 
 
-def test_create_report_filename():
-    assert create_report_filename({'device_name': 'simple'}) == 'simple_analysis_report.pdf'
-    assert create_report_filename({'device_name': 'harder name'}) == 'harder_name_analysis_report.pdf'
-    assert create_report_filename({'device_name': 'dangerous/name'}) == 'dangerous__name_analysis_report.pdf'
+@pytest.mark.parametrize('device_name, pdf_name', [
+    ('simple', 'simple_analysis_report.pdf'),
+    ('harder name', 'harder_name_analysis_report.pdf'),
+    ('dangerous/name', 'dangerous__name_analysis_report.pdf')
+])
+def test_create_report_filename(device_name, pdf_name):
+    assert create_report_filename({'device_name': device_name}) == pdf_name
 
 
 def test_create_analysis_templates():

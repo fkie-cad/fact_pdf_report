@@ -1,6 +1,7 @@
 import logging
 from base64 import decodebytes
 from collections import OrderedDict
+from contextlib import suppress
 from pathlib import Path
 from time import localtime, strftime
 
@@ -10,39 +11,32 @@ from common_helper_files import human_readable_file_size
 GENERIC_TEMPLATE = 'generic.tex'
 
 
-def byte_number_filter(number, verbose=True):
-    if isinstance(number, (int, float)):
-        if verbose:
-            return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' Byte')
-        return human_readable_file_size(int(number))
-    return 'not available'
+def render_number_as_size(number, verbose=True):
+    if not isinstance(number, (int, float)):
+        return 'not available'
+    if verbose:
+        return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' Byte')
+    return human_readable_file_size(int(number))
 
 
-def nice_unix_time(unix_time_stamp):
-    '''
-    input unix_time_stamp
-    output string 'YYYY-MM-DD HH:MM:SS'
-    '''
-    if isinstance(unix_time_stamp, (int, float)):
-        tmp = localtime(unix_time_stamp)
-        return strftime('%Y-%m-%d %H:%M:%S', tmp)
-    return 'not available'
+def render_unix_time(unix_time_stamp):
+    if not isinstance(unix_time_stamp, (int, float)):
+        return 'not available'
+    return strftime('%Y-%m-%d %H:%M:%S', localtime(unix_time_stamp))
 
 
-def nice_number_filter(number):
+def render_number_as_string(number):
     if isinstance(number, int):
         return '{:,}'.format(number)
     if isinstance(number, float):
         return '{:,.2f}'.format(number)
     if isinstance(number, str):
-        try:
+        with suppress(ValueError):
             return str(int(number))
-        except ValueError:
-            pass
     return 'not available'
 
 
-def filter_latex_special_chars(data):
+def replace_special_characters(data):
     latex_character_escapes = OrderedDict()
     latex_character_escapes['\\'] = ''
     latex_character_escapes['\''] = ''
@@ -69,34 +63,31 @@ def filter_latex_special_chars(data):
     return data
 
 
-def convert_base64_to_png_filter(base64_string, filename, directory):
-    file_path = Path(directory, filename + '.png')
+def decode_base64_to_file(base64_string, filename, directory, suffix='png'):
+    file_path = Path(directory, '{}.{}'.format(filename, suffix))
     file_path.write_bytes(decodebytes(base64_string.encode('utf-8')))
     return str(file_path)
 
 
-def filter_chars_in_list(list_of_strings):
+def replace_characters_in_list(list_of_strings):
     return [
-        filter_latex_special_chars(item) for item in list_of_strings
+        replace_special_characters(item) for item in list_of_strings
     ]
 
 
-def split_hash(hash_value, max_length=61):
-    if len(hash_value) > max_length:
-        hash_value = '{} {}'.format(hash_value[:max_length], hash_value[max_length:])
-    return hash_value
+def split_hash_string(hash_string, max_length=61):
+    if len(hash_string) > max_length:
+        hash_string = '{}\n{}'.format(hash_string[:max_length], hash_string[max_length:])
+    return hash_string
 
 
-def split_output_lines(output_value, max_length=92):
-    lines = output_value.splitlines(keepends=True)
-    output = ''
+def split_long_lines(multiline_string, max_length=92):
+    def evaluate_split(line):
+        return line if len(line) <= max_length else '{}\n{}'.format(line[:max_length], line[max_length:])
 
-    for line in lines:
-        if len(line) > max_length:
-            line = '{} {}'.format(line[:max_length], line[max_length:])
-        output += line
-
-    return output
+    return ''.join(
+        evaluate_split(line) for line in multiline_string.splitlines(keepends=True)
+    )
 
 
 def item_contains_string(item, string):
@@ -125,22 +116,21 @@ def create_jinja_environment(templates_to_use='default'):
 
 
 def plugin_name(name):
-    parts = name.split('_')
-    return ' '.join(('{}{}'.format(part[0:1].upper(), part[1:]) for part in parts))
+    return ' '.join((part.title() for part in name.split('_')))
 
 
 def _add_filters_to_jinja(environment):
-    environment.filters['number_format'] = byte_number_filter
-    environment.filters['nice_unix_time'] = nice_unix_time
-    environment.filters['nice_number'] = nice_number_filter
-    environment.filters['filter_chars'] = filter_latex_special_chars
+    environment.filters['number_format'] = render_number_as_size
+    environment.filters['nice_unix_time'] = render_unix_time
+    environment.filters['nice_number'] = render_number_as_string
+    environment.filters['filter_chars'] = replace_special_characters
     environment.filters['elements_count'] = len
-    environment.filters['base64_to_png'] = convert_base64_to_png_filter
+    environment.filters['base64_to_png'] = decode_base64_to_file
     environment.filters['check_list'] = lambda x: x if x else ['list is empty']
     environment.filters['plugin_name'] = plugin_name
-    environment.filters['filter_list'] = filter_chars_in_list
-    environment.filters['split_hash'] = split_hash
-    environment.filters['split_output_lines'] = split_output_lines
+    environment.filters['filter_list'] = replace_characters_in_list
+    environment.filters['split_hash'] = split_hash_string
+    environment.filters['split_output_lines'] = split_long_lines
     environment.filters['contains'] = item_contains_string
 
 
