@@ -49,8 +49,8 @@ def filter_latex_special_chars(data):
     latex_character_escapes['$'] = '\\$'
     latex_character_escapes['('] = '$($'
     latex_character_escapes[')'] = '$)$'
-    latex_character_escapes['['] = '$[$',
-    latex_character_escapes[']'] = '$]$',
+    latex_character_escapes['['] = '$[$'
+    latex_character_escapes[']'] = '$]$'
     latex_character_escapes['#'] = '\\#'
     latex_character_escapes['%'] = '\\%'
     latex_character_escapes['&'] = '\\&'

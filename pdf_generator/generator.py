@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from common_helper_process import execute_shell_command_get_return_code
+from common_helper_process import execute_shell_command
 from pdf_generator.pre_processing.rest import create_request_url, request_firmware_data
 from pdf_generator.tex_generation.template_engine import Engine
 
@@ -12,7 +12,7 @@ from pdf_generator.tex_generation.template_engine import Engine
 def execute_latex(tmp_dir):
     current_dir = os.getcwd()
     os.chdir(tmp_dir)
-    execute_shell_command_get_return_code('env buf_size=1000000 pdflatex main.tex')
+    execute_shell_command('env buf_size=1000000 pdflatex main.tex')
     os.chdir(current_dir)
 
 
@@ -27,13 +27,17 @@ def generate_analysis_templates(engine, analysis):
 
 
 def create_report_filename(meta_data):
-    return '{}_analysis_report.pdf'.format(meta_data['device_name'].replace(' ', '_').replace('/', '__'))
+    unsafe_name = '{}_analysis_report.pdf'.format(meta_data['device_name'])
+    safer_name = unsafe_name.replace(' ', '_').replace('/', '__')
+    return safer_name.encode('latin-1', errors='ignore').decode('latin-1')
 
 
 def compile_pdf(meta_data, tmp_dir):
     copy_fact_image(tmp_dir)
     execute_latex(tmp_dir)
-    shutil.move(str(Path(tmp_dir, 'main.pdf')), str(Path(create_report_filename(meta_data))))
+    target_path = Path(tmp_dir, create_report_filename(meta_data))
+    shutil.move(str(Path(tmp_dir, 'main.pdf')), str(target_path))
+    return target_path
 
 
 def create_templates(analysis, meta_data, tmp_dir):
