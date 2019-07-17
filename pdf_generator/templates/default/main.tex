@@ -1,0 +1,44 @@
+\documentclass{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{longtable}
+\usepackage{sectsty}
+
+\allsectionsfont{\sffamily}
+
+\begin{document}
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\center
+
+\includegraphics[width = 13cm]{fact_logo.png}\\[3cm]
+
+\HRule \\[0.4cm]
+{\fontfamily{lmss}\selectfont
+{\Large \bfseries Firmware Analysis of \VAR{meta_data['hid'] | filter_chars }}\\[0.4cm]
+}
+\HRule \\[1.5cm]
+
+\vspace{3.0cm}
+
+{\fontfamily{lmss}\selectfont
+\input{meta.tex}
+}
+
+\vfill
+\end{titlepage}
+
+\BLOCK{for current_analysis in analysis}
+    \input{\VAR{current_analysis}.tex}
+    \newpage
+\BLOCK{endfor}
+
+\end{document}

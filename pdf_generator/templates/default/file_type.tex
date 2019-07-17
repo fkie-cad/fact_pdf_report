@@ -1,0 +1,20 @@
+\subsection*{File Type (v. \VAR{selected_analysis['plugin_version']})}
+
+{\fontfamily{lmss}\selectfont
+    \begin{longtable}{|p{3cm}|p{11.5cm}|}
+        \hline
+        File Type & \VAR{selected_analysis['full'] | filter_chars} \\
+        \hline
+
+        MIME & \VAR{selected_analysis['mime'] | filter_chars} \\
+        \hline
+
+        \BLOCK{if selected_analysis['summary']}
+            Containing Files
+            \BLOCK{for selected_summary in selected_analysis['summary']}
+                & \VAR{ selected_summary | filter_chars } (\VAR{ selected_analysis['summary'][selected_summary] | elements_count }) \\
+            \BLOCK{endfor}
+            \hline
+        \BLOCK{endif}
+    \end{longtable}
+}

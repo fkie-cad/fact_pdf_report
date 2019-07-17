@@ -1,0 +1,22 @@
+\subsection*{Unpacker (v. \VAR{selected_analysis['plugin_version']})}
+
+{\fontfamily{lmss}\selectfont
+    \begin{longtable}{|p{3cm}|p{11.5cm}|}
+        \hline
+        Plugin & \VAR{selected_analysis['plugin_used'] | filter_chars} \\
+        \hline
+
+        Extracted & \VAR{selected_analysis['number_of_unpacked_files']} \\
+        \hline
+
+        \BLOCK{if selected_analysis['output']}
+            \multicolumn{2}{|p{14.5cm}|}{Output:}\\
+            \multicolumn{2}{|p{14.5cm}|}{}\\
+            \multicolumn{2}{|p{14.5cm}|}{\VAR{selected_analysis['output'] | split_output_lines | filter_chars }} \\
+            \hline
+        \BLOCK{endif}
+
+        Entropy & \VAR{selected_analysis['entropy'] | nice_number} \\
+        \hline
+    \end{longtable}
+}
