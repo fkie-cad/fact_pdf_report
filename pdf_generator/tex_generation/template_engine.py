@@ -9,6 +9,10 @@ import jinja2
 from common_helper_files import human_readable_file_size
 
 GENERIC_TEMPLATE = 'generic.tex'
+MAIN_TEMPLATE = 'main.tex'
+META_TEMPLATE = 'meta.tex'
+PLUGIN_TEMPLATE_BLUEPRINT = '{}.tex'
+LOGO_FILE = 'fact_logo.png'
 
 
 def render_number_as_size(number, verbose=True):
@@ -140,16 +144,16 @@ class TemplateEngine:
         self._tmp_dir = tmp_dir
 
     def render_main_template(self, analysis, meta_data):
-        template = self._environment.get_template('main.tex')
+        template = self._environment.get_template(MAIN_TEMPLATE)
         return template.render(analysis=analysis, meta_data=meta_data)
 
     def render_meta_template(self, meta_data):
-        template = self._environment.get_template('meta_data.tex')
+        template = self._environment.get_template(META_TEMPLATE)
         return template.render(meta_data=meta_data)
 
     def render_analysis_template(self, plugin, analysis):
         try:
-            template = self._environment.get_template('{}.tex'.format(plugin))
+            template = self._environment.get_template(PLUGIN_TEMPLATE_BLUEPRINT.format(plugin))
         except jinja2.TemplateNotFound:
             logging.warning('Falling back on generic template for {}'.format(plugin))
             template = self._environment.get_template(GENERIC_TEMPLATE)

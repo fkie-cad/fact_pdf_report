@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 from pdf_generator.generator import (
-    copy_fact_image, create_report_filename, create_templates, execute_latex, render_analysis_templates
+    LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, PLUGIN_TEMPLATE_BLUEPRINT, copy_fact_image, create_report_filename,
+    create_templates, execute_latex, render_analysis_templates
 )
 
 
@@ -38,7 +39,7 @@ def test_execute_latex(monkeypatch, tmpdir):
 
 def test_copy_fact_image(tmpdir):
     copy_fact_image(str(tmpdir))
-    assert Path(str(tmpdir), 'fact_logo.png').exists()
+    assert Path(str(tmpdir), LOGO_FILE).exists()
 
 
 @pytest.mark.parametrize('device_name, pdf_name', [
@@ -56,7 +57,7 @@ def test_create_analysis_templates():
     assert len(templates) == 1
 
     filename, result_code = templates[0]
-    assert filename == 'test.tex'
+    assert filename == PLUGIN_TEMPLATE_BLUEPRINT.format('test')
     assert result_code == '{"result": "data"}'
 
 
@@ -64,8 +65,8 @@ def test_create_templates(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.TemplateEngine', MockEngine)
     create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=str(tmpdir))
 
-    assert Path(str(tmpdir), 'main.tex').exists()
-    assert Path(str(tmpdir), 'meta.tex').exists()
-    assert Path(str(tmpdir), 'test.tex').exists()
+    assert Path(str(tmpdir), MAIN_TEMPLATE).exists()
+    assert Path(str(tmpdir), META_TEMPLATE).exists()
+    assert Path(str(tmpdir), PLUGIN_TEMPLATE_BLUEPRINT.format('test')).exists()
 
-    assert Path(str(tmpdir), 'test.tex').read_text() == '{"result": "data"}'
+    assert Path(str(tmpdir), PLUGIN_TEMPLATE_BLUEPRINT.format('test')).read_text() == '{"result": "data"}'
