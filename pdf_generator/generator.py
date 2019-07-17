@@ -1,12 +1,9 @@
-import logging
 import os
 import shutil
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from common_helper_process import execute_shell_command
-from pdf_generator.pre_processing.rest import create_request_url, request_firmware_data
-from pdf_generator.tex_generation.template_engine import Engine
+from pdf_generator.tex_generation.template_engine import TemplateEngine
 
 
 def execute_latex(tmp_dir):
@@ -20,7 +17,7 @@ def copy_fact_image(target):
     shutil.copy(str(Path(__file__).parent / 'templates' / 'fact_logo.png'), str(Path(target) / 'fact_logo.png'))
 
 
-def generate_analysis_templates(engine, analysis):
+def render_analysis_templates(engine, analysis):
     return [
         ('{}.tex'.format(analysis_plugin), engine.render_analysis_template(analysis_plugin, analysis[analysis_plugin])) for analysis_plugin in analysis
     ]
@@ -41,24 +38,10 @@ def compile_pdf(meta_data, tmp_dir):
 
 
 def create_templates(analysis, meta_data, tmp_dir):
-    engine = Engine(tmp_dir=tmp_dir)
+    engine = TemplateEngine(tmp_dir=tmp_dir)
 
     Path(tmp_dir, 'main.tex').write_text(engine.render_main_template(analysis=analysis, meta_data=meta_data))
     Path(tmp_dir, 'meta.tex').write_text(engine.render_meta_template(meta_data))
-    for filename, result_code in generate_analysis_templates(engine=engine, analysis=analysis):
-        Path(tmp_dir, filename).write_text(result_code)
 
-
-def generate_report(firmware_uid, server_url=None):
-    request_url = create_request_url(firmware_uid, server_url)
-    try:
-        analysis, meta_data = request_firmware_data(request_url)
-    except RuntimeError as error:
-        logging.warning('No firmware found with UID {}: {}'.format(firmware_uid, error))
-        return 1
-
-    with TemporaryDirectory() as tmp_dir:
-        create_templates(analysis, meta_data, tmp_dir)
-        compile_pdf(meta_data, tmp_dir)
-
-    return 0
+    for filename, rendered_template in render_analysis_templates(engine=engine, analysis=analysis):
+        Path(tmp_dir, filename).write_text(rendered_template)

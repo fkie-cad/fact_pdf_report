@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 from pdf_generator.tex_generation.template_engine import (
-    Engine, byte_number_filter, convert_base64_to_png_filter, filter_chars_in_list, filter_latex_special_chars,
+    TemplateEngine, byte_number_filter, convert_base64_to_png_filter, filter_chars_in_list, filter_latex_special_chars,
     nice_number_filter, nice_unix_time, split_hash, split_output_lines
 )
 
@@ -11,7 +11,7 @@ from pdf_generator.tex_generation.template_engine import (
 
 @pytest.fixture(scope='function')
 def stub_engine(tmpdir):
-    return Engine(template_folder='test', tmp_dir=tmpdir)
+    return TemplateEngine(template_folder='test', tmp_dir=tmpdir)
 
 
 def test_byte_number_filter():

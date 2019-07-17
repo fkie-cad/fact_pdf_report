@@ -144,7 +144,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['contains'] = item_contains_string
 
 
-class Engine:
+class TemplateEngine:
     def __init__(self, template_folder=None, tmp_dir=None):
         self._environment = create_jinja_environment(template_folder if template_folder else 'default')
         self._tmp_dir = tmp_dir

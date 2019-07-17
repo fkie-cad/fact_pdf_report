@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from pdf_generator.generator import (
-    copy_fact_image, create_report_filename, create_templates, execute_latex, generate_analysis_templates
+    copy_fact_image, create_report_filename, create_templates, execute_latex, render_analysis_templates
 )
 
 
@@ -47,7 +47,7 @@ def test_create_report_filename():
 
 
 def test_create_analysis_templates():
-    templates = generate_analysis_templates(engine=MockEngine(), analysis={'test': {'result': 'data'}})
+    templates = render_analysis_templates(engine=MockEngine(), analysis={'test': {'result': 'data'}})
 
     assert len(templates) == 1
 
@@ -57,7 +57,7 @@ def test_create_analysis_templates():
 
 
 def test_create_templates(monkeypatch, tmpdir):
-    monkeypatch.setattr('pdf_generator.generator.Engine', MockEngine)
+    monkeypatch.setattr('pdf_generator.generator.TemplateEngine', MockEngine)
     create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=str(tmpdir))
 
     assert Path(str(tmpdir), 'main.tex').exists()
