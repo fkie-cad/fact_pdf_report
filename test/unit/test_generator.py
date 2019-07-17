@@ -28,7 +28,7 @@ def exec_mock(*_, **__):
 
 
 def test_execute_latex(monkeypatch, tmpdir):
-    monkeypatch.setattr('pdf_generator.generator.execute_shell_command_get_return_code', exec_mock)
+    monkeypatch.setattr('pdf_generator.generator.execute_shell_command', exec_mock)
 
     execute_latex(str(tmpdir))
     assert Path(str(tmpdir), 'test').exists()
