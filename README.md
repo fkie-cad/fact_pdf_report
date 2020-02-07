@@ -1,3 +1,5 @@
+# :exclamation: This Feature is already part of FACT_core :exclamation:
+
 # fact pdf report
 [![Build Status](https://travis-ci.org/fkie-cad/fact_pdf_report.svg?branch=master)](https://travis-ci.org/fkie-cad/fact_pdf_report)
 
