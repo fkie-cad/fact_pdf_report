@@ -11,6 +11,7 @@ from common_helper_files import human_readable_file_size
 GENERIC_TEMPLATE = 'generic.tex'
 MAIN_TEMPLATE = 'main.tex'
 META_TEMPLATE = 'meta.tex'
+CUSTOM_TEMPLATE_CLASS = 'twentysecondcv.cls'
 PLUGIN_TEMPLATE_BLUEPRINT = '{}.tex'
 LOGO_FILE = 'fact_logo.png'
 
@@ -158,3 +159,7 @@ class TemplateEngine:
             logging.warning('Falling back on generic template for {}'.format(plugin))
             template = self._environment.get_template(GENERIC_TEMPLATE)
         return template.render(plugin_name=plugin, selected_analysis=analysis, tmp_dir=self._tmp_dir)
+
+    def render_template_class(self):
+        template = self._environment.get_template(CUSTOM_TEMPLATE_CLASS)
+        return template.render(tmp_dir=self._tmp_dir)
