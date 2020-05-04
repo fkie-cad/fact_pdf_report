@@ -13,7 +13,7 @@ MAIN_TEMPLATE = 'main.tex'
 META_TEMPLATE = 'meta.tex'
 CUSTOM_TEMPLATE_CLASS = 'twentysecondcv.cls'
 PLUGIN_TEMPLATE_BLUEPRINT = '{}.tex'
-LOGO_FILE = 'fact_logo.png'
+LOGO_FILE = '/new_template/fact.png'
 
 
 def render_number_as_size(number, verbose=True):
