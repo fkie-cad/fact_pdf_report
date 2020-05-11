@@ -40,10 +40,11 @@
 %----------------------------------------------------------------------------------------
 
 \aboutme{
-PKCS8 Private Key \\
-SSL Certificate \\
-SSH-RSA Private Key Block \\
-Generic Public Key
+\BLOCK{if 'crypto_material' in analysis}
+	\BLOCK{for selected_summary in analysis['crypto_material']['summary']}
+		\VAR{selected_summary | filter_chars} \\
+	\BLOCK{endfor}
+\BLOCK{endif}
 } % To have no About Me section, just remove all the text and leave \aboutme{}
 
 %----------------------------------------------------------------------------------------
@@ -51,8 +52,12 @@ Generic Public Key
 %----------------------------------------------------------------------------------------
 
 % Skill bar section, each skill must have a value between 0 an 6 (float)
-\skills{{NX/5.96},{Canary/0.01},{PIE/3.82},{RELRO/0.13}}
-
+\skills{
+    \BLOCK{for selected_summary in analysis['exploit_mitigations']['summary']}
+        {\VAR{ selected_summary | filter_chars}/6},
+    \BLOCK{endfor}
+    {}
+}
 %------------------------------------------------
 
 % Skill text section, each skill must have a value between 0 an 6
@@ -68,10 +73,12 @@ Generic Public Key
 %----------------------------------------------------------------------------------------
 
 \section{Binwalk}
+\BLOCK{if analysis['entropy_analysis_graph']}
 
-\subsection{Entropy Graph}
-
-\includegraphics[width = \textwidth]{/tmp/interface/data/entropy_analysis_graph.png}
+	\subsection{Entropy Graph}
+	%\includegraphics[width = \textwidth]{/tmp/interface/data/entropy_analysis_graph.png}
+	\includegraphics[width = \textwidth]{\VAR{analysis['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+\BLOCK{endif}
 
 %\begin{twenty} % Environment for a list with descriptions
 %	\twentyitem{since 1865}{Ph.D. {\normalfont candidate in Computer Science}}{Wonderland}{\emph{A Quantified Theory of Social Cohesion.}}

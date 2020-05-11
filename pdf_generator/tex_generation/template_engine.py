@@ -13,7 +13,7 @@ MAIN_TEMPLATE = 'main.tex'
 META_TEMPLATE = 'meta.tex'
 CUSTOM_TEMPLATE_CLASS = 'twentysecondcv.cls'
 PLUGIN_TEMPLATE_BLUEPRINT = '{}.tex'
-LOGO_FILE = '/new_template/fact.png'
+LOGO_FILE = 'fact.png'
 
 
 def render_number_as_size(number, verbose=True):
@@ -45,6 +45,7 @@ def replace_special_characters(data):
     latex_character_escapes = OrderedDict()
     latex_character_escapes['\\'] = ''
     latex_character_escapes['\''] = ''
+    latex_character_escapes['/'] = ' '
     latex_character_escapes['$'] = '\\$'
     latex_character_escapes['('] = '$($'
     latex_character_escapes[')'] = '$)$'
@@ -99,6 +100,21 @@ def item_contains_string(item, string):
     if not isinstance(item, str):
         return False
     return string in item
+
+
+def count_mitigations(exploit_mitigations):
+    count = 0
+    if 'Canary' in exploit_mitigations['summary']:
+        for selected_summary in exploit_mitigations:
+            if 'Canary' in selected_summary:
+                count += len(selected_summary)
+    elif 'NX' in exploit_mitigations['summary']:
+        pass
+    elif 'RELRO' in exploit_mitigations['summary']:
+        pass
+    elif 'PIE' in exploit_mitigations['summary']:
+        pass
+    return count
 
 
 def create_jinja_environment(templates_to_use='default'):
