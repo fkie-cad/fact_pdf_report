@@ -26,15 +26,47 @@ from pdf_generator.generator import compile_pdf, create_templates
 
 
 def get_data():
-    return json.loads(Path('/tmp', 'interface', 'data', 'analysis.json').read_text()), json.loads(Path('/tmp', 'interface', 'data', 'meta.json').read_text())
+    return json.loads(Path('/tmp', 'interface', 'data', 'analysis.json').read_text()), json.loads(
+        Path('/tmp', 'interface', 'data', 'meta.json').read_text())
 
 
 def move_pdf_report(pdf_path):
     shutil.move(str(pdf_path.absolute()), str(Path('/tmp', 'interface', 'pdf', pdf_path.name)))
 
 
+def count_mitigations(summary):
+    count = 0
+    testing = True
+    for selected_summary in summary:
+        if 'Canary' in selected_summary:
+            count += len(summary[selected_summary])
+    for selected_summary in summary:
+        if 'NX' in selected_summary:
+            if testing:
+                if count != 0:
+                    return count
+                testing = False
+            count += len(summary[selected_summary])
+    testing = True
+    for selected_summary in summary:
+        if 'RELRO' in selected_summary:
+            count += len(summary[selected_summary])
+            if testing:
+                if count != 0:
+                    return count
+                testing = False
+    for selected_summary in summary:
+        if 'PIE' in selected_summary:
+            count += len(summary[selected_summary])
+    return count
+
+
 def main(template_style):
     analysis, meta_data = get_data()
+    try:
+        analysis['exploit_mitigations']['count'] = count_mitigations(analysis['exploit_mitigations']['summary'])
+    except KeyError:
+        pass
 
     with TemporaryDirectory() as tmp_dir:
         create_templates(analysis, meta_data, tmp_dir, template_style)
@@ -46,3 +78,11 @@ def main(template_style):
 
 if __name__ == '__main__':
     exit(main('new_template'))
+
+# TODO
+#  file_hashes
+#  elf_analysis
+#  cpu_architecture
+#  users_and_passwords
+#  software_components
+#  unpacker

@@ -102,21 +102,7 @@ def item_contains_string(item, string):
     return string in item
 
 
-def count_mitigations(exploit_mitigations):
-    count = 0
-    if 'Canary' in exploit_mitigations['summary']:
-        for selected_summary in exploit_mitigations:
-            if 'Canary' in selected_summary:
-                count += len(selected_summary)
-    elif 'NX' in exploit_mitigations['summary']:
-        pass
-    elif 'RELRO' in exploit_mitigations['summary']:
-        pass
-    elif 'PIE' in exploit_mitigations['summary']:
-        pass
-    return count
-
-
+# X-Executable in summary
 def create_jinja_environment(templates_to_use='default'):
     template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
     environment = jinja2.Environment(
@@ -140,6 +126,16 @@ def plugin_name(name):
     return ' '.join((part.title() for part in name.split('_')))
 
 
+def get_five_longest_entries(summary, top=5):
+    sorted_summary = dict()
+    if len(summary) < 6:
+        return summary
+    for key in sorted(summary, key=lambda key: len(summary[key]), reverse=True):
+        sorted_summary.update({key: summary[key]})
+        if len(sorted_summary) == top:
+            return sorted_summary
+
+
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
@@ -153,6 +149,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['split_hash'] = split_hash_string
     environment.filters['split_output_lines'] = split_long_lines
     environment.filters['contains'] = item_contains_string
+    environment.filters['top_five'] = get_five_longest_entries
 
 
 class TemplateEngine:
