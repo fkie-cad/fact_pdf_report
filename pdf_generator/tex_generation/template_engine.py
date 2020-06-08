@@ -134,6 +134,7 @@ def get_five_longest_entries(summary, top=5):
         sorted_summary.update({key: summary[key]})
         if len(sorted_summary) == top:
             return sorted_summary
+    return sorted_summary
 
 
 def _add_filters_to_jinja(environment):
@@ -150,6 +151,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['split_output_lines'] = split_long_lines
     environment.filters['contains'] = item_contains_string
     environment.filters['top_five'] = get_five_longest_entries
+    environment.filters['sort'] = sorted
 
 
 class TemplateEngine:
