@@ -20,7 +20,7 @@ def execute_latex(tmp_dir):
 
 
 def copy_fact_image(target):
-    shutil.copy(str(Path(__file__).parent / 'templates' / LOGO_FILE), str(Path(target) / LOGO_FILE))
+    shutil.copy(str(Path(__file__).parent / 'templates' / 'new_template' / LOGO_FILE), str(Path(target) / LOGO_FILE))
 
 
 def render_analysis_templates(engine, analysis):
@@ -49,8 +49,8 @@ def create_templates(analysis, meta_data, tmp_dir, template_style=None):
     Path(tmp_dir, MAIN_TEMPLATE).write_text(engine.render_main_template(analysis=analysis, meta_data=meta_data))
     Path(tmp_dir, META_TEMPLATE).write_text(engine.render_meta_template(meta_data))
 
-    if template_style:
+    if template_style == 'new_template':
         Path(tmp_dir, CUSTOM_TEMPLATE_CLASS).write_text(engine.render_template_class())
-
-    for filename, rendered_template in render_analysis_templates(engine=engine, analysis=analysis):
-        Path(tmp_dir, filename).write_text(rendered_template)
+    else:
+        for filename, rendered_template in render_analysis_templates(engine=engine, analysis=analysis):
+            Path(tmp_dir, filename).write_text(rendered_template)
