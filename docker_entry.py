@@ -35,38 +35,25 @@ def move_pdf_report(pdf_path):
 
 
 def count_mitigations(summary):
+    for mitigation in ['Canary', 'NX', 'RELRO', 'PIE']:
+        count = count_this_mitigation(summary, mitigation)
+        if count != 0:
+            return count
+    return count
+
+
+def count_this_mitigation(summary, mitigation):
     count = 0
-    testing = True
     for selected_summary in summary:
-        if 'Canary' in selected_summary:
-            count += len(summary[selected_summary])
-    for selected_summary in summary:
-        if 'NX' in selected_summary:
-            if testing:
-                if count != 0:
-                    return count
-                testing = False
-            count += len(summary[selected_summary])
-    testing = True
-    for selected_summary in summary:
-        if 'RELRO' in selected_summary:
-            count += len(summary[selected_summary])
-            if testing:
-                if count != 0:
-                    return count
-                testing = False
-    for selected_summary in summary:
-        if 'PIE' in selected_summary:
+        if mitigation in selected_summary:
             count += len(summary[selected_summary])
     return count
 
 
 def main(template_style):
     analysis, meta_data = get_data()
-    try:
+    if 'exploit_mitigations' in analysis:
         analysis['exploit_mitigations']['count'] = count_mitigations(analysis['exploit_mitigations']['summary'])
-    except KeyError:
-        pass
 
     with TemporaryDirectory() as tmp_dir:
         create_templates(analysis, meta_data, tmp_dir, template_style)
@@ -80,9 +67,8 @@ if __name__ == '__main__':
     exit(main('new_template'))
 
 # TODO
+#  ips_and_uris NOT TESTED
 #  file_hashes
-#  elf_analysis
-#  cpu_architecture
 #  users_and_passwords
 #  software_components
 #  unpacker
