@@ -31,124 +31,116 @@
 
 \input{meta.tex}
 
-%----------------------------------------------------------------------------------------
-
 \begin{document}
 
-%----------------------------------------------------------------------------------------
-%	 ABOUT ME
-%----------------------------------------------------------------------------------------
-
 \aboutme{
-\BLOCK{if analysis | contains('crypto_material')}
+\BLOCK{if 'crypto_material' in analysis}
 	\BLOCK{for selected_summary in analysis['crypto_material']['summary']}
 		\VAR{selected_summary | filter_chars} \\
 	\BLOCK{endfor}
 \BLOCK{endif}
-} % To have no About Me section, just remove all the text and leave \aboutme{}
-
-%----------------------------------------------------------------------------------------
-%	 SKILLS
-%----------------------------------------------------------------------------------------
-
-% Skill bar section, each skill must have a value between 0 an 6 (float)
-\skills{\BLOCK{for selected_summary in analysis['exploit_mitigations']['summary']}{\VAR{selected_summary | filter_chars }/\VAR{analysis['exploit_mitigations']['summary'][selected_summary]|elements_count *6/analysis['exploit_mitigations']['count']}},\BLOCK{endfor}{}
 }
-%------------------------------------------------
 
-% Skill text section, each skill must have a value between 0 an 6
-% \skillstext{{lovely/4},{narcissistic/3}}
-% \skillstext{{lovely/4},{narcissistic/3}}
+\skills{{}\BLOCK{for selected_summary in analysis['exploit_mitigations']['summary'] | sort},{\VAR{selected_summary | filter_chars }/\VAR{analysis['exploit_mitigations']['summary'][selected_summary]|elements_count *6/analysis['exploit_mitigations']['count']}}\BLOCK{endfor}
+}
 
-%----------------------------------------------------------------------------------------
-
-\makeprofile % Print the sidebar
-
-%----------------------------------------------------------------------------------------
-%	 EDUCATION
-%----------------------------------------------------------------------------------------
-
-\section{Binwalk}
-\BLOCK{if analysis['entropy_analysis_graph']}
+\makeprofile
+% ----------------------------------------------------------------------------------------------------------------------
+%  Binwalk & Entropy Graph
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if analysis | contains('entropy_analysis_graph')}
+	\section{Binwalk}
 	\subsection{Entropy Graph}
 	%\includegraphics[width = \textwidth]{/tmp/interface/data/entropy_analysis_graph.png}
 	\includegraphics[width = \textwidth]{\VAR{analysis['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
 \BLOCK{endif}
-
-%\begin{twenty} % Environment for a list with descriptions
-%	\twentyitem{since 1865}{Ph.D. {\normalfont candidate in Computer Science}}{Wonderland}{\emph{A Quantified Theory of Social Cohesion.}}
-%	\twentyitem{1863-1865}{M.Sc. magna cum laude}{Wonderland}{Majoring in Computer Science}
-%	\twentyitem{1861-1863}{B.Sc. magna cum laude}{Wonderland}{Majoring in Computer Science}
-%	\twentyitem{1856-1861}{High school}{Wonderland}{Specializing in mathematics and physics.}
-	%\twentyitem{<dates>}{<title>}{<location>}{<description>}
-%\end{twenty}
-%\BLOCK{for current_analysis in analysis}
-%    \input{\VAR{current_analysis}.tex}
-%\BLOCK{endfor}
-
-
+% ----------------------------------------------------------------------------------------------------------------------
+%  Executables
+% ----------------------------------------------------------------------------------------------------------------------
 \section{Executables}
 
-\begin{twentyshort} % Environment for a short list with no descriptions
-	\twentyitemshort{521}{ARM, 32-bit, little endian}
-	\twentyitemshort{3}{x86, 32-bit, little endian}
-	%\twentyitemshort{<dates>}{<title/description>}
-\end{twentyshort}
+	\begin{twentyshort}
+		\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
+			\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+		\BLOCK{endfor}
+	\end{twentyshort}
+% ----------------------------------------------------------------------------------------------------------------------
+%  Top 5 File Types
+% ----------------------------------------------------------------------------------------------------------------------
+\section{Top five occuring file types}
 
+	\begin{twentyshort}
+	\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
+		\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+	\BLOCK{endfor}
+	\end{twentyshort}
+% ----------------------------------------------------------------------------------------------------------------------
+%  Known Vulnerabilities
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'known_vulnerabilities' in analysis}
+	\section{Known Vulnerabilities}
 
-\section{Top five occuring file types}\\
-
-\begin{twentyshort}
-\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
-	\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
-\BLOCK{endfor}
-\end{twentyshort}
-
-\BLOCK{if analysis['known_vulnerabilities']}
-	\section{Known Vulnerabilities}\\
-
+	% \href{https://nvd.nist.gov/vuln/detail/CVE-2014-0160}{The SSL Hearbleed bug allowing buffer overread
 	\begin{twentyshort} % Environment for a short list with no descriptions
 		\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
 			\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
 		\BLOCK{endfor}
 	\end{twentyshort}
 \BLOCK{endif}
-% \href{https://nvd.nist.gov/vuln/detail/CVE-2014-0160}{The SSL Hearbleed bug allowing buffer overread
-\section{Software}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  Software Components
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'software_components' in analysis}
+	\section{Software}
 
-\begin{twentyshort}
-	\BLOCK{for software in analysis['software_components']['summary']}
-	\twentyitemshort{\VAR{software | filter_chars}}{}
-	\BLOCK{endfor}
-%\twentyitemshort{0.6.10}{wpa\_supplicant}
-\end{twentyshort}
+	\begin{twentyshort}
+		\BLOCK{for software in analysis['software_components']['summary'] | sort}
+		\twentyitemshort{\VAR{software | filter_chars}}{}
+		\BLOCK{endfor}
+	\end{twentyshort}
+\BLOCK{endif}
+% ----------------------------------------------------------------------------------------------------------------------
+%  ELF ANALYSIS
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'elf_analysis' in analysis}
+	\section{ELF Analysis}
 
+	\begin{twentyshort}
+		\BLOCK{for ELF in analysis['elf_analysis']['summary'] | top_five(20)}
+		\twentyitemshort{\VAR{analysis['elf_analysis']['summary'][ELF] | elements_count}}{\VAR{ELF | filter_chars}}
+		\BLOCK{endfor}
+	\end{twentyshort}
+\BLOCK{endif}
+% ----------------------------------------------------------------------------------------------------------------------
+%  IP & URI
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if ('ips_v4' in analysis or 'ips_v6' in analysis or 'uris' in analysis)}
+{\begin{longtable}{|p{3cm}|p{11.5cm}|}
+        \BLOCK{if 'ips_v4' in analysis}
+			\hline
+			IPs v4
+			\BLOCK{for ip in analysis['ips_v4'] | check_list | filter_list}
+				& \VAR{ip} \\
+			\BLOCK{endfor}
+        \BLOCK{elif 'ips_v6' in analysis}
+			\hline
 
-% \section{IPs and URIs}
+			IPs v6
+			\BLOCK{for ip in analysis['ips_v6'] | check_list | filter_list}
+				& \VAR{ip} \\
+			\BLOCK{endfor}
+		\BLOCK{elif 'uris' in analysis}
+			\hline
 
-% \subsection{IPs}
-
-% Total: 140
-
-% \begin{itemize}
-% \item 192.168.1.1
-% \end{itemize}
-
-% \subsection{URIs}
-
-% Total: 12
-
-% \begin{itemize}
-% \item www.bud.de
-% \end{itemize}
-
-%\section{Experience}
-
-%\begin{twenty} % Environment for a list with descriptions
-	%\twentyitem{1900}{Alice in Wonderland-The Circra (1900's) Silent Film.}{Film}{The first Alice on film was over a hundred years ago.}
-	%\twentyitem{<dates>}{<title>}{<location>}{<description>}
-%\end{twenty}
-
+			URIs
+			\BLOCK{for uri in analysis['uris'] | check_list | filter_list}
+				& \VAR{uri} \\
+			\BLOCK{endfor}
+		\BLOCK{endif}
+        \hline
+    \end{longtable}
+}
+\BLOCK{endif}
 
 %----------------------------------------------------------------------------------------
 %	 SECOND PAGE EXAMPLE
