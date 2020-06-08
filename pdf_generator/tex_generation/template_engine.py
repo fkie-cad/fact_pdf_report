@@ -137,6 +137,48 @@ def get_five_longest_entries(summary, top=5):
     return sorted_summary
 
 
+def exploit_mitigation(summary):
+    summary = summary['exploit_mitigations']['summary']
+    max_count = count_mitigations(summary) * 6  # skillsbar is maxed out at 6
+    pie_num, canary_num, relro_num, nx_num, fortify_num = 0, 0, 0, 0, 0
+    for selected_summary in summary:
+        if 'PIE' in selected_summary and ('disabled' in selected_summary or 'invalid' in selected_summary):
+            pie_num += len(summary[selected_summary])
+        if 'RELRO' in selected_summary and 'disabled' in selected_summary:
+            relro_num += len(summary[selected_summary])
+        if 'CANARY' in selected_summary and 'disabled' in selected_summary:
+            canary_num += len(summary[selected_summary])
+        if 'NX' in selected_summary and 'disabled' in selected_summary:
+            nx_num += len(summary[selected_summary])
+        if 'FORTIFY' in selected_summary and 'disabled' in selected_summary:
+            fortify_num += len(summary[selected_summary])
+    return '{0}{2}/{3}{1},{0}{4}/{5}{1},{0}{6}/{7}{1},{0}{8}/{9}{1}'.format('{', '}', 'CANARY', canary_num / max_count,
+                                                                    'PIE', pie_num / max_count,
+                                                                    'RELRO', relro_num / max_count,
+                                                                    'NX', nx_num / max_count,
+                                                                    'FORTIFY_SOURCE', fortify_num / max_count)
+
+
+#  exp mitigation: PIE disabled + invalid
+#                  RELRO partially + fully
+
+
+def count_mitigations(summary):
+    for mitigation in ['Canary', 'NX', 'RELRO', 'PIE', 'FORTIFY']:
+        count = count_this_mitigation(summary, mitigation)
+        if count != 0:
+            return count
+    return count
+
+
+def count_this_mitigation(summary, mitigation):
+    count = 0
+    for selected_summary in summary:
+        if mitigation in selected_summary:
+            count += len(summary[selected_summary])
+    return count
+
+
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
@@ -152,6 +194,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['contains'] = item_contains_string
     environment.filters['top_five'] = get_five_longest_entries
     environment.filters['sort'] = sorted
+    environment.filters['call_for_mitigations'] = exploit_mitigation
 
 
 class TemplateEngine:

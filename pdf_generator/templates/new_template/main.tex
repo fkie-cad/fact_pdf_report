@@ -41,8 +41,9 @@
 \BLOCK{endif}
 }
 
-\skills{{}\BLOCK{for selected_summary in analysis['exploit_mitigations']['summary'] | sort},{\VAR{selected_summary | filter_chars }/\VAR{analysis['exploit_mitigations']['summary'][selected_summary]|elements_count *6/analysis['exploit_mitigations']['count']}}\BLOCK{endfor}
-}
+\skills{\VAR{ analysis | call_for_mitigations}}
+
+%#\skills{\BLOCK{for selected_summary in analysis['exploit_mitigations']['summary'] | sort},{\VAR{selected_summary | filter_chars }/\VAR{analysis['exploit_mitigations']['summary'][selected_summary]|elements_count *6/analysis['exploit_mitigations']['count']}}\BLOCK{endfor}}
 
 \makeprofile
 % ----------------------------------------------------------------------------------------------------------------------
@@ -102,15 +103,15 @@
 % ----------------------------------------------------------------------------------------------------------------------
 %  ELF ANALYSIS
 % ----------------------------------------------------------------------------------------------------------------------
-\BLOCK{if 'elf_analysis' in analysis}
-	\section{ELF Analysis}
-
-	\begin{twentyshort}
-		\BLOCK{for ELF in analysis['elf_analysis']['summary'] | top_five(20)}
-		\twentyitemshort{\VAR{analysis['elf_analysis']['summary'][ELF] | elements_count}}{\VAR{ELF | filter_chars}}
-		\BLOCK{endfor}
-	\end{twentyshort}
-\BLOCK{endif}
+%\BLOCK{if 'elf_analysis' in analysis }
+%	\section{ELF Analysis}
+%
+%	\begin{twentyshort}
+%		\BLOCK{for ELF in analysis['elf_analysis']['summary'] | top_five(20)}
+%		\twentyitemshort{\VAR{analysis['elf_analysis']['summary'][ELF] | elements_count}}{\VAR{ELF | filter_chars}}
+%		\BLOCK{endfor}
+%	\end{twentyshort}
+%\BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------
