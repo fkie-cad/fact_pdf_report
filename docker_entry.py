@@ -51,5 +51,4 @@ if __name__ == '__main__':
     exit(main('new_template'))
 
 # TODO
-#  ips_and_uris NOT TESTED
 #  icons
