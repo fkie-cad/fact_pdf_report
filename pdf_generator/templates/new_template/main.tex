@@ -19,15 +19,9 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[letterpaper]{twentysecondcv} % a4paper for A4
+\documentclass[letterpaper, icon]{twentysecondcv}
 
-%----------------------------------------------------------------------------------------
-%	 PERSONAL INFORMATION
-%----------------------------------------------------------------------------------------
-
-% If you don't need one or more of the below, just remove the content leaving the command, e.g. \cvnumberphone{}
-
-\profilepic{fact.png} % Profile picture
+\profilepic{fact.png}
 
 \input{meta.tex}
 
@@ -43,17 +37,14 @@
 
 \skills{\VAR{ analysis | call_for_mitigations}}
 
-%#\skills{\BLOCK{for selected_summary in analysis['exploit_mitigations']['summary'] | sort},{\VAR{selected_summary | filter_chars }/\VAR{analysis['exploit_mitigations']['summary'][selected_summary]|elements_count *6/analysis['exploit_mitigations']['count']}}\BLOCK{endfor}}
-
 \makeprofile
 % ----------------------------------------------------------------------------------------------------------------------
 %  Binwalk & Entropy Graph
 % ----------------------------------------------------------------------------------------------------------------------
-\BLOCK{if analysis | contains('entropy_analysis_graph')}
-	\section{Binwalk}
-	\subsection{Entropy Graph}
-	%\includegraphics[width = \textwidth]{/tmp/interface/data/entropy_analysis_graph.png}
-	\includegraphics[width = \textwidth]{\VAR{analysis['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+\BLOCK{if 'binwalk' in analysis}
+	\section{Entropy Graph}
+
+	\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  Executables
@@ -81,8 +72,7 @@
 \BLOCK{if 'known_vulnerabilities' in analysis}
 	\section{Known Vulnerabilities}
 
-	% \href{https://nvd.nist.gov/vuln/detail/CVE-2014-0160}{The SSL Hearbleed bug allowing buffer overread
-	\begin{twentyshort} % Environment for a short list with no descriptions
+	\begin{twentyshort}
 		\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
 			\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
 		\BLOCK{endfor}
@@ -95,8 +85,8 @@
 	\section{Software}
 
 	\begin{twentyshort}
-		\BLOCK{for software in analysis['software_components']['summary'] | sort}
-		\twentyitemshort{\VAR{software | filter_chars}}{}
+		\BLOCK{for summary in analysis['software_components']['summary'] | sort}
+		\twentyitemshort{\VAR{summary | split_space}}
 		\BLOCK{endfor}
 	\end{twentyshort}
 \BLOCK{endif}
@@ -116,6 +106,8 @@
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if ('ips_v4' in analysis or 'ips_v6' in analysis or 'uris' in analysis)}
+\section{IPs \& URIs}
+
 {\begin{longtable}{|p{3cm}|p{11.5cm}|}
         \BLOCK{if 'ips_v4' in analysis}
 			\hline
@@ -147,9 +139,9 @@
 %	 SECOND PAGE EXAMPLE
 %----------------------------------------------------------------------------------------
 
-% \newpage % Start a new page
+%\newpage % Start a new page
 
-% \makeprofile % Print the sidebar
+%\makeprofile % Print the sidebar
 
 % \section{Other information}
 

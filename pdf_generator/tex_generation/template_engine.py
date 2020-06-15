@@ -139,28 +139,29 @@ def get_five_longest_entries(summary, top=5):
 
 def exploit_mitigation(summary):
     summary = summary['exploit_mitigations']['summary']
-    max_count = count_mitigations(summary) * 6  # skillsbar is maxed out at 6
+    max_count = count_mitigations(summary)  # skillsbar is maxed out at 6
     pie_num, canary_num, relro_num, nx_num, fortify_num = 0, 0, 0, 0, 0
     for selected_summary in summary:
-        if 'PIE' in selected_summary and ('disabled' in selected_summary or 'invalid' in selected_summary):
+        if 'PIE' in selected_summary and 'present' in selected_summary:
             pie_num += len(summary[selected_summary])
-        if 'RELRO' in selected_summary and 'disabled' in selected_summary:
+        if 'RELRO' in selected_summary and 'enabled' in selected_summary:
             relro_num += len(summary[selected_summary])
-        if 'CANARY' in selected_summary and 'disabled' in selected_summary:
+        if 'Canary' in selected_summary and 'enabled' in selected_summary:
             canary_num += len(summary[selected_summary])
-        if 'NX' in selected_summary and 'disabled' in selected_summary:
+        if 'NX' in selected_summary and 'enabled' in selected_summary:
             nx_num += len(summary[selected_summary])
-        if 'FORTIFY' in selected_summary and 'disabled' in selected_summary:
+        if 'FORTIFY' in selected_summary and 'enabled' in selected_summary:
             fortify_num += len(summary[selected_summary])
-    return '{0}{2}/{3}{1},{0}{4}/{5}{1},{0}{6}/{7}{1},{0}{8}/{9}{1}'.format('{', '}', 'CANARY', canary_num / max_count,
-                                                                    'PIE', pie_num / max_count,
-                                                                    'RELRO', relro_num / max_count,
-                                                                    'NX', nx_num / max_count,
-                                                                    'FORTIFY_SOURCE', fortify_num / max_count)
-
-
-#  exp mitigation: PIE disabled + invalid
-#                  RELRO partially + fully
+    return '{0}{2}/{3}{1},' \
+           '{0}{4}/{5}{1},' \
+           '{0}{6}/{7}{1},' \
+           '{0}{8}/{9}{1},' \
+           '{0}{10}/{11}{1}'.format('{', '}',
+                                    'CANARY', canary_num * 6 / max_count,
+                                    'PIE', pie_num * 6 / max_count,
+                                    'RELRO', relro_num * 6 / max_count,
+                                    'NX', nx_num * 6 / max_count,
+                                    'FORTIFY\_SOURCE', fortify_num * 6 / max_count)
 
 
 def count_mitigations(summary):
@@ -179,6 +180,29 @@ def count_this_mitigation(summary, mitigation):
     return count
 
 
+def software_components(software_string):
+    # analysis['software_components']['summary']
+    if ' ' in software_string:
+        if len(software_string.split(' ')) > 2:
+            software = ''.join(software_string.split(' ')[:-1])
+            ver_number = software_string.split(' ')[-1]
+            try:
+                int(ver_number[0])
+            except ValueError:
+                ver_number, software = software, ver_number
+        elif isinstance(software_string.split(' '), list) and len(software_string.split(' ')[1]) > 0:
+            software, ver_number = software_string.split(' ')
+            try:
+                int(ver_number[0])
+            except ValueError:
+                ver_number, software = software, ver_number
+        else:
+            software = software_string
+            ver_number = ''
+
+    return '{}{}{}{}'.format(ver_number, '}', '{', software)
+
+
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
@@ -195,6 +219,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['top_five'] = get_five_longest_entries
     environment.filters['sort'] = sorted
     environment.filters['call_for_mitigations'] = exploit_mitigation
+    environment.filters['split_space'] = software_components
 
 
 class TemplateEngine:
@@ -204,7 +229,7 @@ class TemplateEngine:
 
     def render_main_template(self, analysis, meta_data):
         template = self._environment.get_template(MAIN_TEMPLATE)
-        return template.render(analysis=analysis, meta_data=meta_data)
+        return template.render(analysis=analysis, meta_data=meta_data, tmp_dir=self._tmp_dir)
 
     def render_meta_template(self, meta_data):
         template = self._environment.get_template(META_TEMPLATE)

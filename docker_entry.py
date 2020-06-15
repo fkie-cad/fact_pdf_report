@@ -34,26 +34,10 @@ def move_pdf_report(pdf_path):
     shutil.move(str(pdf_path.absolute()), str(Path('/tmp', 'interface', 'pdf', pdf_path.name)))
 
 
-def count_mitigations(summary):
-    for mitigation in ['Canary', 'NX', 'RELRO', 'PIE']:
-        count = count_this_mitigation(summary, mitigation)
-        if count != 0:
-            return count
-    return count
-
-
-def count_this_mitigation(summary, mitigation):
-    count = 0
-    for selected_summary in summary:
-        if mitigation in selected_summary:
-            count += len(summary[selected_summary])
-    return count
-
-
 def main(template_style):
     analysis, meta_data = get_data()
-    if 'exploit_mitigations' in analysis:
-        analysis['exploit_mitigations']['count'] = count_mitigations(analysis['exploit_mitigations']['summary'])
+#    if 'exploit_mitigations' in analysis:
+#        analysis['exploit_mitigations']['count'] = count_mitigations(analysis['exploit_mitigations']['summary'])
 
     with TemporaryDirectory() as tmp_dir:
         create_templates(analysis, meta_data, tmp_dir, template_style)
@@ -68,7 +52,4 @@ if __name__ == '__main__':
 
 # TODO
 #  ips_and_uris NOT TESTED
-#  file_hashes
-#  users_and_passwords
-#  software_components
-#  unpacker
+#  icons
