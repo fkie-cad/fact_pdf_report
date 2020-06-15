@@ -55,7 +55,7 @@
 		\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
 			\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
 		\BLOCK{endfor}
-	\end{twentyshort}
+	\end{twentyshort}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  Top 5 File Types
 % ----------------------------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@
 	\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
 		\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
 	\BLOCK{endfor}
-	\end{twentyshort}
+	\end{twentyshort}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  Known Vulnerabilities
 % ----------------------------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@
 			\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
 		\BLOCK{endfor}
 	\end{twentyshort}
-\BLOCK{endif}
+\BLOCK{endif}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  Software Components
 % ----------------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@
 		\twentyitemshort{}{and \VAR{analysis['software_components']['summary'] | elements_count - 10} others}
 	\BLOCK{endif}
 	\end{twentyshort}
-\BLOCK{endif}
+\BLOCK{endif}\\
 
 % ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
