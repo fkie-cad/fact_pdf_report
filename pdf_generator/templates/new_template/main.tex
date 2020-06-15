@@ -91,48 +91,16 @@
 	\end{twentyshort}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
-%  ELF ANALYSIS
-% ----------------------------------------------------------------------------------------------------------------------
-%\BLOCK{if 'elf_analysis' in analysis }
-%	\section{ELF Analysis}
-%
-%	\begin{twentyshort}
-%		\BLOCK{for ELF in analysis['elf_analysis']['summary'] | top_five(20)}
-%		\twentyitemshort{\VAR{analysis['elf_analysis']['summary'][ELF] | elements_count}}{\VAR{ELF | filter_chars}}
-%		\BLOCK{endfor}
-%	\end{twentyshort}
-%\BLOCK{endif}
-% ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------
-\BLOCK{if ('ips_v4' in analysis or 'ips_v6' in analysis or 'uris' in analysis)}
-\section{IPs \& URIs}
+\BLOCK{if 'ip_and_uri_finder' in analysis}
+\section{IPs and URIs}
 
-{\begin{longtable}{|p{3cm}|p{11.5cm}|}
-        \BLOCK{if 'ips_v4' in analysis}
-			\hline
-			IPs v4
-			\BLOCK{for ip in analysis['ips_v4'] | check_list | filter_list}
-				& \VAR{ip} \\
+		\begin{twentyshort}
+			\BLOCK{for selected_analysis in analysis['ip_and_uri_finder']['summary'] | triplet}
+			    \twentyitemshort{\VAR{selected_analysis}}
 			\BLOCK{endfor}
-        \BLOCK{elif 'ips_v6' in analysis}
-			\hline
-
-			IPs v6
-			\BLOCK{for ip in analysis['ips_v6'] | check_list | filter_list}
-				& \VAR{ip} \\
-			\BLOCK{endfor}
-		\BLOCK{elif 'uris' in analysis}
-			\hline
-
-			URIs
-			\BLOCK{for uri in analysis['uris'] | check_list | filter_list}
-				& \VAR{uri} \\
-			\BLOCK{endfor}
-		\BLOCK{endif}
-        \hline
-    \end{longtable}
-}
+		\end{twentyshort}
 \BLOCK{endif}
 
 %----------------------------------------------------------------------------------------

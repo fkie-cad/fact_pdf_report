@@ -5,6 +5,8 @@ from contextlib import suppress
 from pathlib import Path
 from time import localtime, strftime
 
+from random import choice
+import socket
 import jinja2
 from common_helper_files import human_readable_file_size
 
@@ -182,6 +184,8 @@ def count_this_mitigation(summary, mitigation):
 
 def software_components(software_string):
     # analysis['software_components']['summary']
+    software = software_string
+    ver_number = ''
     if ' ' in software_string:
         if len(software_string.split(' ')) > 2:
             software = ''.join(software_string.split(' ')[:-1])
@@ -196,11 +200,44 @@ def software_components(software_string):
                 int(ver_number[0])
             except ValueError:
                 ver_number, software = software, ver_number
-        else:
-            software = software_string
-            ver_number = ''
-
     return '{}{}{}{}'.format(ver_number, '}', '{', software)
+
+
+def get_triples(analysis):
+    combined_triples = []
+    for desired in ['IPv4', 'IPv6', 'URI ']:
+        combined_triples.append(get_desired_triple(analysis, desired))
+    return combined_triples
+
+
+def get_desired_triple(seleced_summary, which_desired):
+    desired_list = ip_or_uri(seleced_summary, which_desired)
+    chosen_one = 'x x' * 60
+    while len(chosen_one) > 40:
+        chosen_one = choice(desired_list)
+    return '{2}{1}{0}{3}{5} {4}'.format('{', '}', len(desired_list), which_desired,
+                                        replace_special_characters(chosen_one), '\quad' * 10)
+
+
+def ip_or_uri(summary, which_select):
+    new_list = []
+    for data in summary:
+        if ('URI ' in which_select and not _validate_ip(data, socket.AF_INET) and not _validate_ip(data, socket.AF_INET6)):
+            new_list.append(data)
+        elif 'IPv4' in which_select and _validate_ip(data, socket.AF_INET):
+            new_list.append(data)
+        elif 'IPv6' in which_select and _validate_ip(data, socket.AF_INET6):
+            new_list.append(data)
+    return new_list
+
+
+#  imported from ip & uri
+def _validate_ip(ip, address_format):
+    try:
+        _ = socket.inet_pton(address_format, ip)
+        return True
+    except OSError:
+        return False
 
 
 def _add_filters_to_jinja(environment):
@@ -220,6 +257,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['sort'] = sorted
     environment.filters['call_for_mitigations'] = exploit_mitigation
     environment.filters['split_space'] = software_components
+    environment.filters['triplet'] = get_triples
 
 
 class TemplateEngine:
