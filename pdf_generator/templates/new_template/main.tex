@@ -85,11 +85,15 @@
 	\section{Software}
 
 	\begin{twentyshort}
-		\BLOCK{for summary in analysis['software_components']['summary'] | sort}
+		\BLOCK{for summary in analysis['software_components']['summary'] | sort | x_entires}
 		\twentyitemshort{\VAR{summary | split_space}}
 		\BLOCK{endfor}
+	\BLOCK{if analysis['software_components']['summary'] | elements_count > 10}
+		\twentyitemshort{}{and \VAR{analysis['software_components']['summary'] | elements_count - 10} others}
+	\BLOCK{endif}
 	\end{twentyshort}
 \BLOCK{endif}
+
 % ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------

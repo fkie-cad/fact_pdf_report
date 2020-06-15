@@ -47,7 +47,7 @@ def replace_special_characters(data):
     latex_character_escapes = OrderedDict()
     latex_character_escapes['\\'] = ''
     latex_character_escapes['\''] = ''
-    latex_character_escapes['/'] = ' '
+    latex_character_escapes['/'] = '/'
     latex_character_escapes['$'] = '\\$'
     latex_character_escapes['('] = '$($'
     latex_character_escapes[')'] = '$)$'
@@ -215,14 +215,15 @@ def get_desired_triple(seleced_summary, which_desired):
     chosen_one = 'x x' * 60
     while len(chosen_one) > 50:
         chosen_one = choice(desired_list)
-    return '{2}{1}{0}{3}{4} {5}'.format('{', '}', len(desired_list), which_desired, '\quad' * 5,
+    return '{2}{1}{0}{3}{4}$\>$ (incl. {5})'.format('{', '}', len(desired_list), which_desired, '\quad',
                                         replace_special_characters(chosen_one))
 
 
 def ip_or_uri(summary, which_select):
     new_list = []
     for data in summary:
-        if ('URI ' in which_select and not _validate_ip(data, socket.AF_INET) and not _validate_ip(data, socket.AF_INET6)):
+        if ('URI ' in which_select and not _validate_ip(data, socket.AF_INET) and not _validate_ip(data,
+                                                                                                   socket.AF_INET6)):
             new_list.append(data)
         elif 'IPv4' in which_select and _validate_ip(data, socket.AF_INET):
             new_list.append(data)
@@ -231,13 +232,19 @@ def ip_or_uri(summary, which_select):
     return new_list
 
 
-#  imported from ip & uri
 def _validate_ip(ip, address_format):
     try:
         _ = socket.inet_pton(address_format, ip)
         return True
     except OSError:
         return False
+
+
+def get_x_entries(summary, how_many=10):
+    if len(summary) <= how_many:
+        return summary
+    else:
+        return summary[:how_many]
 
 
 def _add_filters_to_jinja(environment):
@@ -258,6 +265,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['call_for_mitigations'] = exploit_mitigation
     environment.filters['split_space'] = software_components
     environment.filters['triplet'] = get_triples
+    environment.filters['x_entires'] = get_x_entries
 
 
 class TemplateEngine:
