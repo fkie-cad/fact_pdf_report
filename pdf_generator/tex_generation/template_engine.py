@@ -213,10 +213,10 @@ def get_triples(analysis):
 def get_desired_triple(seleced_summary, which_desired):
     desired_list = ip_or_uri(seleced_summary, which_desired)
     chosen_one = 'x x' * 60
-    while len(chosen_one) > 40:
+    while len(chosen_one) > 50:
         chosen_one = choice(desired_list)
-    return '{2}{1}{0}{3}{5} {4}'.format('{', '}', len(desired_list), which_desired,
-                                        replace_special_characters(chosen_one), '\quad' * 10)
+    return '{2}{1}{0}{3}{4} {5}'.format('{', '}', len(desired_list), which_desired, '\quad' * 5,
+                                        replace_special_characters(chosen_one))
 
 
 def ip_or_uri(summary, which_select):
