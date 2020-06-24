@@ -22,6 +22,20 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 
+\newbool{icon}
+\DeclareOption{icon}{%
+ \booltrue{icon}
+}
+\DeclareOption{print}{\def\@cv@print{}}
+\DeclareOption*{
+  \PassOptionsToClass{\CurrentOption}{article}
+}
+\ProcessOptions\relax
+\ifbool{icon}{\RequirePackage{fontawesome}}{}
+
+\usetikzlibrary{calc}
+
+
 %----------------------------------------------------------------------------------------
 %	 COLOURS
 %----------------------------------------------------------------------------------------
@@ -139,10 +153,10 @@
 
 		\renewcommand{\arraystretch}{1.6}
 		\begin{tabular}{p{0.5cm} @{\hskip 0.5cm}p{5cm}}
-			\ifthenelse{\equal{\cvdate}{}}{}{\textsc{\Large\icon{\Info}} & \cvdate\\}
-			\ifthenelse{\equal{\cvaddress}{}}{}{\textsc{\Large\icon{\Letter}} & \cvaddress\\}
-			\ifthenelse{\equal{\cvnumberphone}{}}{}{\textsc{\Large\icon{\Telefon}} & \cvnumberphone\\}
-			\ifthenelse{\equal{\cvsite}{}}{}{\textsc{\Large\icon{\Mundus}} & \cvsite\\}
+			\ifthenelse{\equal{\cvdate}{}}{}{\textsc{\large\icon{\faIndustry}} & \cvdate\\}
+			\ifthenelse{\equal{\cvaddress}{}}{}{\textsc{\Large\icon{\faArrowsH}} & \cvaddress\\}
+			\ifthenelse{\equal{\cvnumberphone}{}}{}{\textsc{\Large\icon{\faCodeFork}} & \cvnumberphone\\}
+			\ifthenelse{\equal{\cvsite}{}}{}{\textsc{\large\icon{\faCalendar}} & \cvsite\\}
 			\ifthenelse{\equal{\cvmail}{}}{}{\textsc{\large\icon{@}} & \href{mailto:\cvmail}{\cvmail}}
 		\end{tabular}
 

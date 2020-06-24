@@ -51,4 +51,4 @@ if __name__ == '__main__':
     exit(main('new_template'))
 
 # TODO
-#  icons
+#  order of sections

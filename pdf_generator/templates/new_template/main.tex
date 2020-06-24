@@ -42,42 +42,10 @@
 %  Binwalk & Entropy Graph
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'binwalk' in analysis}
-	\section{Entropy Graph}
+	%\section{Entropy Graph}
 
 	\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
 \BLOCK{endif}
-% ----------------------------------------------------------------------------------------------------------------------
-%  Executables
-% ----------------------------------------------------------------------------------------------------------------------
-\section{Executables}
-
-	\begin{twentyshort}
-		\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
-			\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
-		\BLOCK{endfor}
-	\end{twentyshort}\\
-% ----------------------------------------------------------------------------------------------------------------------
-%  Top 5 File Types
-% ----------------------------------------------------------------------------------------------------------------------
-\section{Top five occuring file types}
-
-	\begin{twentyshort}
-	\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
-		\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
-	\BLOCK{endfor}
-	\end{twentyshort}\\
-% ----------------------------------------------------------------------------------------------------------------------
-%  Known Vulnerabilities
-% ----------------------------------------------------------------------------------------------------------------------
-\BLOCK{if 'known_vulnerabilities' in analysis}
-	\section{Known Vulnerabilities}
-
-	\begin{twentyshort}
-		\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
-			\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
-		\BLOCK{endfor}
-	\end{twentyshort}
-\BLOCK{endif}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  Software Components
 % ----------------------------------------------------------------------------------------------------------------------
@@ -93,7 +61,28 @@
 	\BLOCK{endif}
 	\end{twentyshort}
 \BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  Known Vulnerabilities
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'known_vulnerabilities' in analysis}
+	\section{Known Vulnerabilities}
 
+	\begin{twentyshort}
+		\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
+			\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
+		\BLOCK{endfor}
+	\end{twentyshort}
+\BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  Top 5 File Types
+% ----------------------------------------------------------------------------------------------------------------------
+\section{Top five occuring file types}
+
+	\begin{twentyshort}
+	\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
+		\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+	\BLOCK{endfor}
+	\end{twentyshort}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------
@@ -106,7 +95,16 @@
 			\BLOCK{endfor}
 		\end{twentyshort}
 \BLOCK{endif}
+% ----------------------------------------------------------------------------------------------------------------------
+%  Executables
+% ----------------------------------------------------------------------------------------------------------------------
+\section{Executables}
 
+	\begin{twentyshort}
+		\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
+			\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+		\BLOCK{endfor}
+	\end{twentyshort}\\
 %----------------------------------------------------------------------------------------
 %	 SECOND PAGE EXAMPLE
 %----------------------------------------------------------------------------------------
