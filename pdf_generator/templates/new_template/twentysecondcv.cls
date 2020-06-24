@@ -43,8 +43,13 @@
 \definecolor{white}{RGB}{255,255,255}
 \definecolor{gray}{HTML}{4D4D4D}
 \definecolor{sidecolor}{HTML}{E7E7E7}
+\definecolor{mainblue_place_holder}{HTML}{0E5484}
+\definecolor{maingray_place_holder}{HTML}{B9B9B9}
+\definecolor{fraunhofer_dark_green}{HTML}{009879}% fraunhofer dark green
+\definecolor{fraunhofer_light_green}{HTML}{69C0AC}% fraunhofer light green
 \definecolor{mainblue}{HTML}{0E5484}
-\definecolor{maingray}{HTML}{B9B9B9}
+\definecolor{maingray}{HTML}{69C0AC}
+
 
 %----------------------------------------------------------------------------------------
 %	 MISC CONFIGURATIONS
