@@ -34,7 +34,7 @@ def move_pdf_report(pdf_path):
     shutil.move(str(pdf_path.absolute()), str(Path('/tmp', 'interface', 'pdf', pdf_path.name)))
 
 
-def main(template_style):
+def main(template_style='default'):
     analysis, meta_data = get_data()
 #    if 'exploit_mitigations' in analysis:
 #        analysis['exploit_mitigations']['count'] = count_mitigations(analysis['exploit_mitigations']['summary'])
@@ -48,7 +48,7 @@ def main(template_style):
 
 
 if __name__ == '__main__':
-    exit(main('new_template'))
+    exit(main())
 
 # TODO
 #  order of sections

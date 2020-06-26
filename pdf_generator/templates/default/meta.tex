@@ -1,23 +1,11 @@
-\begin{tabular}{|p{3cm}|p{11.5cm}|}
-    \hline
-    HID & \VAR{meta_data['hid'] | filter_chars}\\
-    \hline
+\cvname{\VAR{meta_data['device_name'] | filter_chars }} % Your name
+\cvjobtitle{\VAR{meta_data['device_class'] | filter_chars }} % Job title/career
 
-    Device Name & \VAR{meta_data['device_name'] | filter_chars}\\
-    \hline
+\cvdate{\VAR{meta_data['vendor'] | filter_chars }} % Date of birth
+\cvaddress{\VAR{meta_data['size'] | number_format}} % Short address/location, use \newline if more than 1 line is required
+\cvnumberphone{\VAR{meta_data['version'] | filter_chars}} % Phone number
+\cvsite{\VAR{meta_data['release_date']}} % Personal website
+\cvmail{} % Email address
 
-    Vendor & \VAR{meta_data['vendor'] | filter_chars}\\
-    \hline
-
-    Device Class & \VAR{meta_data['device_class'] | filter_chars}\\
-    \hline
-
-    Version & \VAR{meta_data['version'] | filter_chars}\\
-    \hline
-
-    Release Date & \VAR{meta_data['release_date']}\\
-    \hline
-
-    Size & \VAR{meta_data['size'] | number_format}\\
-    \hline
-\end{tabular}
+% to change the icons: line 142 in twentysecondcv.cls
+% all icons possible from: https://github.com/spagnuolocarmine/TwentySecondsCurriculumVitae-LaTex/raw/master/fontawesome.pdf
