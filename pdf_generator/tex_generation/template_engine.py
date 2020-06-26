@@ -1,4 +1,3 @@
-import logging
 from base64 import decodebytes
 from collections import OrderedDict
 from contextlib import suppress
@@ -10,11 +9,9 @@ import socket
 import jinja2
 from common_helper_files import human_readable_file_size
 
-GENERIC_TEMPLATE = 'generic.tex'
 MAIN_TEMPLATE = 'main.tex'
 META_TEMPLATE = 'meta.tex'
 CUSTOM_TEMPLATE_CLASS = 'twentysecondcv.cls'
-PLUGIN_TEMPLATE_BLUEPRINT = '{}.tex'
 LOGO_FILE = 'fact.png'
 
 
@@ -47,7 +44,7 @@ def replace_special_characters(data):
     latex_character_escapes = OrderedDict()
     latex_character_escapes['\\'] = ''
     latex_character_escapes['\''] = ''
-    latex_character_escapes['/'] = '/'
+    latex_character_escapes['/'] = '/'  # no need to replace?
     latex_character_escapes['$'] = '\\$'
     latex_character_escapes['('] = '$($'
     latex_character_escapes[')'] = '$)$'
@@ -141,7 +138,7 @@ def get_five_longest_entries(summary, top=5):
 
 def exploit_mitigation(summary):
     summary = summary['exploit_mitigations']['summary']
-    max_count = count_mitigations(summary)  # skillsbar is maxed out at 6
+    max_count = count_mitigations(summary)  # skillsbar is maxed at 6
     pie_num, canary_num, relro_num, nx_num, fortify_num = 0, 0, 0, 0, 0
     for selected_summary in summary:
         if 'PIE' in selected_summary and 'present' in selected_summary:
@@ -183,7 +180,6 @@ def count_this_mitigation(summary, mitigation):
 
 
 def software_components(software_string):
-    # analysis['software_components']['summary']
     software = software_string
     ver_number = ''
     if ' ' in software_string:
@@ -216,7 +212,7 @@ def get_desired_triple(seleced_summary, which_desired):
     while len(chosen_one) > 50:
         chosen_one = choice(desired_list)
     return '{2}{1}{0}{3}{4}$\>$ (incl. {5})'.format('{', '}', len(desired_list), which_desired, '\quad',
-                                        replace_special_characters(chosen_one))
+                                                    replace_special_characters(chosen_one))
 
 
 def ip_or_uri(summary, which_select):
@@ -273,21 +269,13 @@ class TemplateEngine:
         self._environment = create_jinja_environment(template_folder if template_folder else 'default')
         self._tmp_dir = tmp_dir
 
-    def render_main_template(self, analysis, meta_data):
+    def render_main_template(self, analysis):
         template = self._environment.get_template(MAIN_TEMPLATE)
-        return template.render(analysis=analysis, meta_data=meta_data, tmp_dir=self._tmp_dir)
+        return template.render(analysis=analysis, tmp_dir=self._tmp_dir)
 
     def render_meta_template(self, meta_data):
         template = self._environment.get_template(META_TEMPLATE)
         return template.render(meta_data=meta_data)
-
-    def render_analysis_template(self, plugin, analysis):
-        try:
-            template = self._environment.get_template(PLUGIN_TEMPLATE_BLUEPRINT.format(plugin))
-        except jinja2.TemplateNotFound:
-            logging.warning('Falling back on generic template for {}'.format(plugin))
-            template = self._environment.get_template(GENERIC_TEMPLATE)
-        return template.render(plugin_name=plugin, selected_analysis=analysis, tmp_dir=self._tmp_dir)
 
     def render_template_class(self):
         template = self._environment.get_template(CUSTOM_TEMPLATE_CLASS)

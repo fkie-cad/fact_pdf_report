@@ -21,7 +21,7 @@ import json
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
-
+from sys import exit as sys_exit
 from pdf_generator.generator import compile_pdf, create_templates
 
 
@@ -36,8 +36,6 @@ def move_pdf_report(pdf_path):
 
 def main(template_style='default'):
     analysis, meta_data = get_data()
-#    if 'exploit_mitigations' in analysis:
-#        analysis['exploit_mitigations']['count'] = count_mitigations(analysis['exploit_mitigations']['summary'])
 
     with TemporaryDirectory() as tmp_dir:
         create_templates(analysis, meta_data, tmp_dir, template_style)
@@ -48,7 +46,4 @@ def main(template_style='default'):
 
 
 if __name__ == '__main__':
-    exit(main())
-
-# TODO
-#  order of sections
+    sys_exit(main())
