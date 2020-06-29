@@ -13,7 +13,7 @@
 % License:
 % The MIT License (see included LICENSE file)
 %
-% %
+% % % % % % % %
 
 %----------------------------------------------------------------------------------------
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
@@ -42,8 +42,6 @@
 %  Binwalk & Entropy Graph
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'binwalk' in analysis}
-	%\section{Entropy Graph}
-
 	\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------

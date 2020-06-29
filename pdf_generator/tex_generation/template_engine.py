@@ -1,6 +1,5 @@
 from base64 import decodebytes
 from collections import OrderedDict
-from contextlib import suppress
 from pathlib import Path
 from time import localtime, strftime
 
@@ -29,22 +28,10 @@ def render_unix_time(unix_time_stamp):
     return strftime('%Y-%m-%d %H:%M:%S', localtime(unix_time_stamp))
 
 
-def render_number_as_string(number):
-    if isinstance(number, int):
-        return '{:,}'.format(number)
-    if isinstance(number, float):
-        return '{:,.2f}'.format(number)
-    if isinstance(number, str):
-        with suppress(ValueError):
-            return str(int(number))
-    return 'not available'
-
-
 def replace_special_characters(data):
     latex_character_escapes = OrderedDict()
     latex_character_escapes['\\'] = ''
     latex_character_escapes['\''] = ''
-    latex_character_escapes['/'] = '/'  # no need to replace?
     latex_character_escapes['$'] = '\\$'
     latex_character_escapes['('] = '$($'
     latex_character_escapes[')'] = '$)$'
@@ -74,33 +61,6 @@ def decode_base64_to_file(base64_string, filename, directory, suffix='png'):
     return str(file_path)
 
 
-def replace_characters_in_list(list_of_strings):
-    return [
-        replace_special_characters(item) for item in list_of_strings
-    ]
-
-
-def split_hash_string(hash_string, max_length=61):
-    if len(hash_string) > max_length:
-        hash_string = '{}\n{}'.format(hash_string[:max_length], hash_string[max_length:])
-    return hash_string
-
-
-def split_long_lines(multiline_string, max_length=92):
-    def evaluate_split(line):
-        return line if len(line) <= max_length else '{}\n{}'.format(line[:max_length], line[max_length:])
-
-    return ''.join(
-        evaluate_split(line) for line in multiline_string.splitlines(keepends=True)
-    )
-
-
-def item_contains_string(item, string):
-    if not isinstance(item, str):
-        return False
-    return string in item
-
-
 # X-Executable in summary
 def create_jinja_environment(templates_to_use='default'):
     template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
@@ -121,10 +81,6 @@ def create_jinja_environment(templates_to_use='default'):
     return environment
 
 
-def plugin_name(name):
-    return ' '.join((part.title() for part in name.split('_')))
-
-
 def get_five_longest_entries(summary, top=5):
     sorted_summary = dict()
     if len(summary) < 6:
@@ -138,7 +94,7 @@ def get_five_longest_entries(summary, top=5):
 
 def exploit_mitigation(summary):
     summary = summary['exploit_mitigations']['summary']
-    max_count = count_mitigations(summary)  # skillsbar is maxed at 6
+    max_count = count_mitigations(summary)  # bar is maxed at 6
     pie_num, canary_num, relro_num, nx_num, fortify_num = 0, 0, 0, 0, 0
     for selected_summary in summary:
         if 'PIE' in selected_summary and 'present' in selected_summary:
@@ -151,15 +107,10 @@ def exploit_mitigation(summary):
             nx_num += len(summary[selected_summary])
         if 'FORTIFY' in selected_summary and 'enabled' in selected_summary:
             fortify_num += len(summary[selected_summary])
-    return '{0}{2}/{3}{1},' \
-           '{0}{4}/{5}{1},' \
-           '{0}{6}/{7}{1},' \
-           '{0}{8}/{9}{1},' \
-           '{0}{10}/{11}{1}'.format('{', '}',
-                                    'CANARY', canary_num * 6 / max_count,
-                                    'PIE', pie_num * 6 / max_count,
-                                    'RELRO', relro_num * 6 / max_count,
-                                    'NX', nx_num * 6 / max_count,
+    return '{0}{2}/{3}{1},{0}{4}/{5}{1},' \
+           '{0}{6}/{7}{1},{0}{8}/{9}{1},' \
+           '{0}{10}/{11}{1}'.format('{', '}', 'CANARY', canary_num * 6 / max_count, 'PIE', pie_num * 6 / max_count,
+                                    'RELRO', relro_num * 6 / max_count, 'NX', nx_num * 6 / max_count,
                                     'FORTIFY\_SOURCE', fortify_num * 6 / max_count)
 
 
@@ -246,16 +197,9 @@ def get_x_entries(summary, how_many=10):
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
-    environment.filters['nice_number'] = render_number_as_string
     environment.filters['filter_chars'] = replace_special_characters
     environment.filters['elements_count'] = len
     environment.filters['base64_to_png'] = decode_base64_to_file
-    environment.filters['check_list'] = lambda x: x if x else ['list is empty']
-    environment.filters['plugin_name'] = plugin_name
-    environment.filters['filter_list'] = replace_characters_in_list
-    environment.filters['split_hash'] = split_hash_string
-    environment.filters['split_output_lines'] = split_long_lines
-    environment.filters['contains'] = item_contains_string
     environment.filters['top_five'] = get_five_longest_entries
     environment.filters['sort'] = sorted
     environment.filters['call_for_mitigations'] = exploit_mitigation
