@@ -21,23 +21,24 @@ import json
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
-
+from sys import exit as sys_exit
 from pdf_generator.generator import compile_pdf, create_templates
 
 
 def get_data():
-    return json.loads(Path('/tmp', 'interface', 'data', 'analysis.json').read_text()), json.loads(Path('/tmp', 'interface', 'data', 'meta.json').read_text())
+    return json.loads(Path('/tmp', 'interface', 'data', 'analysis.json').read_text()), json.loads(
+        Path('/tmp', 'interface', 'data', 'meta.json').read_text())
 
 
 def move_pdf_report(pdf_path):
     shutil.move(str(pdf_path.absolute()), str(Path('/tmp', 'interface', 'pdf', pdf_path.name)))
 
 
-def main():
+def main(template_style='default'):
     analysis, meta_data = get_data()
 
     with TemporaryDirectory() as tmp_dir:
-        create_templates(analysis, meta_data, tmp_dir)
+        create_templates(analysis, meta_data, tmp_dir, template_style)
         target_path = compile_pdf(meta_data, tmp_dir)
         move_pdf_report(target_path)
 
@@ -45,4 +46,4 @@ def main():
 
 
 if __name__ == '__main__':
-    exit(main())
+    sys_exit(main())
