@@ -13,8 +13,6 @@ PDF_NAME = Path(MAIN_TEMPLATE).with_suffix('.pdf').name
 def execute_latex(tmp_dir):
     current_dir = os.getcwd()
     os.chdir(tmp_dir)
-    print(current_dir)
-    print(tmp_dir)
     execute_shell_command('env buf_size=1000000 pdflatex {}'.format(MAIN_TEMPLATE))
     os.chdir(current_dir)
 
