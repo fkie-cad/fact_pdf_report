@@ -84,7 +84,7 @@ def create_jinja_environment(templates_to_use='default'):
 
 def get_five_longest_entries(summary, top=5):
     sorted_summary = dict()
-    if len(summary) < 6:
+    if len(summary) < top+1:
         return summary
     for key in sorted(summary, key=lambda key: len(summary[key]), reverse=True):
         sorted_summary.update({key: summary[key]})
