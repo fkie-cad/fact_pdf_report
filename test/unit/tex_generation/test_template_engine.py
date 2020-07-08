@@ -2,9 +2,12 @@ from pathlib import Path
 
 import pytest
 from pdf_generator.tex_generation.template_engine import (
-    TemplateEngine, decode_base64_to_file, render_number_as_size, render_number_as_string, render_unix_time,
-    replace_characters_in_list, replace_special_characters, split_hash_string, split_long_lines
+    TemplateEngine, decode_base64_to_file, render_number_as_size, render_unix_time,
+    replace_special_characters, get_five_longest_entries
 )
+
+from test.data.test_dict import TEST_DICT
+
 
 # pylint: disable=redefined-outer-name
 
@@ -22,32 +25,11 @@ def test_byte_number_filter():
     assert render_number_as_size(128000, verbose=False) == '125.00 KiB'
 
 
-def test_nice_number_filter():
-    assert render_number_as_string(None) == 'not available'
-    assert render_number_as_string('no int') == 'not available'
-
-    assert render_number_as_string(12) == '12'
-    assert render_number_as_string(12.1) == '12.10'
-    assert render_number_as_string(12.101) == '12.10'
-    assert render_number_as_string(12.109) == '12.11'
-    assert render_number_as_string('12') == '12'
-
-
 @pytest.mark.skip(reason='Since local time used, result is not stable')
 def test_nice_unix_time():
     assert render_unix_time(None) == 'not available'
 
     assert render_unix_time(10) == '1970-01-01 01:00:10'
-
-
-def test_split_hash():
-    assert split_hash_string('X' * 62) == '{}\nX'.format('X' * 61)
-    assert split_hash_string('X' * 61) == 'X' * 61
-
-
-def test_split_output_lines():
-    assert split_long_lines('X\nX') == 'X\nX'
-    assert split_long_lines('{}\nX'.format('X' * 93)) == '{}\nX\nX'.format('X' * 92)
 
 
 def test_convert_base64_to_png_filter(tmpdir):
@@ -62,12 +44,6 @@ def test_filter_latex_special_chars():
     assert replace_special_characters(r'100 $') == r'100 \$'
 
 
-def test_filter_chars_in_list():
-    assert replace_characters_in_list([]) == []
-
-    assert replace_characters_in_list([r'safe', r'un\safe']) == ['safe', 'unsafe']
-
-
 def test_render_meta_template(stub_engine):
     assert stub_engine.render_meta_template(meta_data='anything') == 'Test anything - '
 
@@ -78,3 +54,10 @@ def test_render_main_template(stub_engine):
 
 def test_render_analysis_template(stub_engine):
     assert stub_engine.render_analysis_template(plugin='non_existing', analysis='result') == 'Presenting: result'
+
+
+def test_get_five_longest_entries():
+    assert len(get_five_longest_entries(TEST_DICT['firmware']['analysis']['file_type']['summary'], top=3)) <= 3
+    longest_dict = get_five_longest_entries(TEST_DICT['firmware']['analysis']['file_type']['summary'], top=1)
+    assert len(longest_dict) == 1
+    assert 'text/plain' in longest_dict.keys()
