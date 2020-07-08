@@ -95,7 +95,7 @@ def get_five_longest_entries(summary, top=5):
 
 def exploit_mitigation(summary):
     summary = summary['exploit_mitigations']['summary']
-    max_count = count_mitigations(summary)  # bar is maxed at 6
+    max_count = count_mitigations(summary)
     numbers = dict()
     for key in ['PIE', 'RELRO', 'Canary', 'NX', 'FORTIFY']:
         numbers[key] = count_occurrences(key, summary)
