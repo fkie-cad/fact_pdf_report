@@ -84,7 +84,7 @@ def create_jinja_environment(templates_to_use='default'):
 
 def get_five_longest_entries(summary, top=5):
     sorted_summary = dict()
-    if len(summary) < top+1:
+    if len(summary) < top + 1:
         return summary
     for key in sorted(summary, key=lambda key: len(summary[key]), reverse=True):
         sorted_summary.update({key: summary[key]})
@@ -95,10 +95,10 @@ def get_five_longest_entries(summary, top=5):
 
 def exploit_mitigation(summary):
     summary = summary['exploit_mitigations']['summary']
-    max_count = count_mitigations(summary)
+    max_count = _count_mitigations(summary)
     numbers = dict()
     for key in ['PIE', 'RELRO', 'Canary', 'NX', 'FORTIFY']:
-        numbers[key] = count_occurrences(key, summary)
+        numbers[key] = _count_occurrences(key, summary)
     return (
         f'{{CANARY/{numbers["Canary"] / max_count}}},{{PIE/{numbers["PIE"] / max_count}}},'
         f'{{RELRO/{numbers["RELRO"] / max_count}}},{{NX/{numbers["NX"] / max_count}}},'
@@ -106,7 +106,7 @@ def exploit_mitigation(summary):
     )
 
 
-def count_occurrences(key, summary):
+def _count_occurrences(key, summary):
     return sum(
         len(summary[entry])
         for entry in summary
@@ -114,15 +114,15 @@ def count_occurrences(key, summary):
     )
 
 
-def count_mitigations(summary):
+def _count_mitigations(summary):
     for mitigation in ['Canary', 'NX', 'RELRO', 'PIE', 'FORTIFY']:
-        count = count_this_mitigation(summary, mitigation)
+        count = _count_this_mitigation(summary, mitigation)
         if count != 0:
             return count
     return count
 
 
-def count_this_mitigation(summary, mitigation):
+def _count_this_mitigation(summary, mitigation):
     count = 0
     for selected_summary in summary:
         if mitigation in selected_summary:
@@ -134,26 +134,26 @@ def software_components(software_string):
     software = software_string
     ver_number = ''
     if ' ' in software_string:
-        splitted_software_string = software_string.split(' ')
-        if len(splitted_software_string) > 2:
-            software, ver_number = larger_two_components(splitted_software_string)
-        elif len(splitted_software_string[1]) > 0:
-            software, ver_number = less_three_components(splitted_software_string)
+        split_software_string = software_string.split(' ')
+        if len(split_software_string) > 2:
+            software, ver_number = _larger_two_components(split_software_string)
+        elif len(split_software_string[1]) > 0:
+            software, ver_number = _less_three_components(split_software_string)
     return f'{ver_number}}}{{{software}'
 
 
-def less_three_components(software_string):
+def _less_three_components(software_string):
     software, ver_number = software_string
-    try:
-        int(ver_number[0])
-    except ValueError:
-        return ver_number, software
-    return software, ver_number
+    return _order_components(software, ver_number)
 
 
-def larger_two_components(software_string):
+def _larger_two_components(software_string):
     software = ''.join(software_string[:-1])
     ver_number = software_string[-1]
+    return _order_components(software, ver_number)
+
+
+def _order_components(software, ver_number):
     try:
         int(ver_number[0])
     except ValueError:
@@ -164,19 +164,19 @@ def larger_two_components(software_string):
 def get_triples(analysis):
     combined_triples = []
     for desired in ['IPv4', 'IPv6', 'URI ']:
-        combined_triples.append(get_desired_triple(analysis, desired))
+        combined_triples.append(_get_desired_triple(analysis, desired))
     return combined_triples
 
 
-def get_desired_triple(seleced_summary, which_desired):
-    desired_list = ip_or_uri(seleced_summary, which_desired)
+def _get_desired_triple(seleced_summary, which_desired):
+    desired_list = _ip_or_uri(seleced_summary, which_desired)
     chosen_one = 'x x' * 60
     while len(chosen_one) > 50:
         chosen_one = choice(desired_list)
     return f'{len(desired_list)}}}{{{which_desired}\\quad$\\>$ (incl. {replace_special_characters(chosen_one)})'
 
 
-def ip_or_uri(summary, which_select):
+def _ip_or_uri(summary, which_select):
     new_list = []
     for data in summary:
         if ('URI ' in which_select and not _validate_ip(data, socket.AF_INET) and not _validate_ip(data,
