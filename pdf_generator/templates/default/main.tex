@@ -21,28 +21,44 @@
 
 \documentclass[letterpaper, icon]{twentysecondcv}
 
+%----------------------------------------------------------------------------------------
+%	SIDE BAR
+%----------------------------------------------------------------------------------------
+
 \profilepic{fact.png}
 
 \input{meta.tex}
 
 \begin{document}
-
+%----------------------------------------------------------------------------------------
+%	CRYPTOGRAPHY
+%----------------------------------------------------------------------------------------
 \aboutme{
 \BLOCK{if 'crypto_material' in analysis}
 	\BLOCK{for selected_summary in analysis['crypto_material']['summary']}
 		\VAR{selected_summary | filter_chars} \\
 	\BLOCK{endfor}
+\BLOCK{else}
+No Crypto
 \BLOCK{endif}
 }
-
-\skills{\VAR{ analysis | call_for_mitigations}}
+%----------------------------------------------------------------------------------------
+%	EXPLOIT MITIGATION
+%----------------------------------------------------------------------------------------
+\BLOCK{if 'exploit_mitigations' in analysis}
+    \skills{\VAR{ analysis | call_for_mitigations}}
+\BLOCK{else}
+    \skills{No Analysis Done/1}
+\BLOCK{endif}
 
 \makeprofile
 % ----------------------------------------------------------------------------------------------------------------------
 %  Binwalk & Entropy Graph
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'binwalk' in analysis}
-	\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+	\BLOCK{if 'entropy_analysis_graph' in analysis['binwalk']}
+		\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+	\BLOCK{endif}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  Software Components
@@ -96,6 +112,7 @@
 % ----------------------------------------------------------------------------------------------------------------------
 %  Executables
 % ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'cpu_architecture' in analysis}
 \section{Executables}
 
 	\begin{twentyshort}
@@ -103,6 +120,7 @@
 			\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
 		\BLOCK{endfor}
 	\end{twentyshort}\\
+\BLOCK{endif}
 %----------------------------------------------------------------------------------------
 %	 SECOND PAGE EXAMPLE
 %----------------------------------------------------------------------------------------
