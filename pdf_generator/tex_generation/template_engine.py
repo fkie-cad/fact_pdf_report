@@ -139,7 +139,7 @@ def software_components(software_string):
             software, ver_number = _larger_two_components(split_software_string)
         elif len(split_software_string[1]) > 0:
             software, ver_number = _less_three_components(split_software_string)
-    return f'{ver_number}}}{{{software}'
+    return f'{ver_number}}}{{{replace_special_characters(software)}'
 
 
 def _less_three_components(software_string):
@@ -203,6 +203,17 @@ def get_x_entries(summary, how_many=10):
     return summary[:how_many]
 
 
+def cve_criticals(summary):
+    f_string = []
+    else_count = len(summary)
+    for cve in summary:
+        if 'CRITICAL' in cve:
+            f_string.append(cve)
+            else_count -= 1
+    f_string.append(f'and {else_count} other uncritical')
+    return f_string
+
+
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
@@ -215,6 +226,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['split_space'] = software_components
     environment.filters['triplet'] = get_triples
     environment.filters['x_entires'] = get_x_entries
+    environment.filters['cve_crits'] = cve_criticals
 
 
 class TemplateEngine:

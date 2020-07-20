@@ -79,13 +79,29 @@ No Crypto
 %  Known Vulnerabilities
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'known_vulnerabilities' in analysis}
-	\section{Known Vulnerabilities}
+	\BLOCK{if analysis['known_vulnerabilities']['summary'] | length}
+		\section{Known Vulnerabilities}
 
-	\begin{twentyshort}
-		\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
-			\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
-		\BLOCK{endfor}
-	\end{twentyshort}
+		\begin{twentyshort}
+			\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
+				\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
+			\BLOCK{endfor}
+		\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  CVE Lookup
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'cve_lookup' in analysis}
+	\BLOCK{if analysis['cve_lookup']['summary'] | length}
+		\section{CVE Lookup}
+
+		\begin{twentyshort}
+			\BLOCK{for cve in analysis['cve_lookup']['summary'] | cve_crits}
+				\twentyitemshort{\VAR{cve | filter_chars}}{}
+			\BLOCK{endfor}
+		\end{twentyshort}
+	\BLOCK{endif}
 \BLOCK{endif}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  Top 5 File Types
@@ -105,7 +121,7 @@ No Crypto
 
 		\begin{twentyshort}
 			\BLOCK{for selected_analysis in analysis['ip_and_uri_finder']['summary'] | triplet}
-			    \twentyitemshort{\VAR{selected_analysis}}
+			    \twentyitemshort{\VAR{selected_analysis | filter_chars}}
 			\BLOCK{endfor}
 		\end{twentyshort}
 \BLOCK{endif}
