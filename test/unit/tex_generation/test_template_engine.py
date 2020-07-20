@@ -8,7 +8,6 @@ from pdf_generator.tex_generation.template_engine import (
 
 from test.data.test_dict import TEST_DICT
 
-
 # pylint: disable=redefined-outer-name
 
 
@@ -49,15 +48,11 @@ def test_render_meta_template(stub_engine):
 
 
 def test_render_main_template(stub_engine):
-    assert stub_engine.render_main_template(meta_data='anything', analysis='else') == 'Test anything - else'
-
-
-def test_render_analysis_template(stub_engine):
-    assert stub_engine.render_analysis_template(plugin='non_existing', analysis='result') == 'Presenting: result'
+    assert stub_engine.render_main_template(analysis='else') == 'Test  - else'
 
 
 def test_get_five_longest_entries():
-    assert len(get_five_longest_entries(TEST_DICT['firmware']['analysis']['file_type']['summary'], top=3)) <= 3
-    longest_dict = get_five_longest_entries(TEST_DICT['firmware']['analysis']['file_type']['summary'], top=1)
+    assert len(get_five_longest_entries(TEST_DICT['file_type']['summary'], top=3)) <= 3
+    longest_dict = get_five_longest_entries(TEST_DICT['file_type']['summary'], top=1)
     assert len(longest_dict) == 1
-    assert 'text/plain' in longest_dict.keys()
+    assert 'compression/zlib' in longest_dict.keys()

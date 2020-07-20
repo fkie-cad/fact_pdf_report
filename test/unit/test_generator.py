@@ -3,9 +3,10 @@ from pathlib import Path
 
 import pytest
 from pdf_generator.generator import (
-    LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, PLUGIN_TEMPLATE_BLUEPRINT, copy_fact_image, create_report_filename,
-    create_templates, execute_latex, render_analysis_templates
+    LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, copy_fact_image, create_report_filename,
+    create_templates, execute_latex
 )
+from test.data.test_dict import TEST_DICT, META_DICT
 
 
 class MockEngine:
@@ -13,8 +14,8 @@ class MockEngine:
         pass
 
     @staticmethod
-    def render_main_template(analysis, meta_data):
-        return '{}\n{}'.format(json.dumps(analysis), json.dumps(meta_data))
+    def render_main_template(analysis):
+        return '{}'.format(json.dumps(analysis))
 
     @staticmethod
     def render_meta_template(meta_data):
@@ -23,6 +24,10 @@ class MockEngine:
     @staticmethod
     def render_analysis_template(_, analysis):
         return json.dumps(analysis)
+
+    @staticmethod
+    def render_template_class():
+        return json.dumps('template_class.cls')
 
 
 def exec_mock(*_, **__):
@@ -51,22 +56,9 @@ def test_create_report_filename(device_name, pdf_name):
     assert create_report_filename({'device_name': device_name}) == pdf_name
 
 
-def test_create_analysis_templates():
-    templates = render_analysis_templates(engine=MockEngine(), analysis={'test': {'result': 'data'}})
-
-    assert len(templates) == 1
-
-    filename, result_code = templates[0]
-    assert filename == PLUGIN_TEMPLATE_BLUEPRINT.format('test')
-    assert result_code == '{"result": "data"}'
-
-
 def test_create_templates(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.TemplateEngine', MockEngine)
-    create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=str(tmpdir))
+    create_templates(analysis=TEST_DICT, meta_data=META_DICT, tmp_dir=str(tmpdir))
 
     assert Path(str(tmpdir), MAIN_TEMPLATE).exists()
     assert Path(str(tmpdir), META_TEMPLATE).exists()
-    assert Path(str(tmpdir), PLUGIN_TEMPLATE_BLUEPRINT.format('test')).exists()
-
-    assert Path(str(tmpdir), PLUGIN_TEMPLATE_BLUEPRINT.format('test')).read_text() == '{"result": "data"}'
