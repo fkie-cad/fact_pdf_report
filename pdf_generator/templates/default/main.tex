@@ -35,9 +35,11 @@
 %----------------------------------------------------------------------------------------
 \aboutme{
 \BLOCK{if 'crypto_material' in analysis}
-	\BLOCK{for selected_summary in analysis['crypto_material']['summary']}
-		\VAR{selected_summary | filter_chars} \\
-	\BLOCK{endfor}
+	\BLOCK{if analysis['crypto_material']['summary'] | length}
+		\BLOCK{for selected_summary in analysis['crypto_material']['summary']}
+			\VAR{selected_summary | filter_chars} \\
+		\BLOCK{endfor}
+	\BLOCK{endif}
 \BLOCK{else}
 No Crypto
 \BLOCK{endif}
@@ -46,7 +48,10 @@ No Crypto
 %	EXPLOIT MITIGATION
 %----------------------------------------------------------------------------------------
 \BLOCK{if 'exploit_mitigations' in analysis}
-    \skills{\VAR{ analysis | call_for_mitigations}}
+	\BLOCK{if analysis['exploit_mitigations']['summary'] | length}
+
+		\skills{\VAR{ analysis | call_for_mitigations}}
+	\BLOCK{endif}
 \BLOCK{else}
     \skills{No Analysis Done/1}
 \BLOCK{endif}
@@ -57,23 +62,28 @@ No Crypto
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'binwalk' in analysis}
 	\BLOCK{if 'entropy_analysis_graph' in analysis['binwalk']}
-		\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+		\BLOCK{if analysis['binwalk']['entropy_analysis_graph'] | length}
+
+			\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+		\BLOCK{endif}
 	\BLOCK{endif}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  Software Components
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'software_components' in analysis}
-	\section{Software}
+	\BLOCK{if analysis['software_components']['summary'] | length}
+		\section{Software}
 
-	\begin{twentyshort}
-		\BLOCK{for summary in analysis['software_components']['summary'] | sort | x_entires}
-		\twentyitemshort{\VAR{summary | split_space}}
-		\BLOCK{endfor}
-	\BLOCK{if analysis['software_components']['summary'] | elements_count > 10}
-		\twentyitemshort{}{and \VAR{analysis['software_components']['summary'] | elements_count - 10} others}
+		\begin{twentyshort}
+			\BLOCK{for summary in analysis['software_components']['summary'] | sort | x_entires}
+			\twentyitemshort{\VAR{summary | split_space}}
+			\BLOCK{endfor}
+		\BLOCK{if analysis['software_components']['summary'] | elements_count > 10}
+			\twentyitemshort{}{and \VAR{analysis['software_components']['summary'] | elements_count - 10} others}
+		\BLOCK{endif}
+		\end{twentyshort}
 	\BLOCK{endif}
-	\end{twentyshort}
 \BLOCK{endif}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  Known Vulnerabilities
@@ -106,36 +116,45 @@ No Crypto
 % ----------------------------------------------------------------------------------------------------------------------
 %  Top 5 File Types
 % ----------------------------------------------------------------------------------------------------------------------
-\section{Top five occuring file types}
+\BLOCK{if 'file_type' in analysis}
+	\BLOCK{if analysis['file_type']['summary'] | length}
+		\section{Top five occuring file types}
 
-	\begin{twentyshort}
-	\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
-		\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
-	\BLOCK{endfor}
-	\end{twentyshort}\\
+			\begin{twentyshort}
+			\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
+				\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+			\BLOCK{endfor}
+			\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}\\
 % ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'ip_and_uri_finder' in analysis}
-\section{IPs and URIs}
+	\BLOCK{if analysis['ip_and_uri_finder']['summary'] | length}
+		\section{IPs and URIs}
 
 		\begin{twentyshort}
 			\BLOCK{for selected_analysis in analysis['ip_and_uri_finder']['summary'] | triplet}
-			    \twentyitemshort{\VAR{selected_analysis | filter_chars}}
+			    \twentyitemshort{\VAR{selected_analysis}}
 			\BLOCK{endfor}
 		\end{twentyshort}
+	\BLOCK{endif}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  Executables
 % ----------------------------------------------------------------------------------------------------------------------
 \BLOCK{if 'cpu_architecture' in analysis}
-\section{Executables}
+	\BLOCK{if analysis['cpu_architecture']['summary'] | length}
 
-	\begin{twentyshort}
-		\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
-			\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
-		\BLOCK{endfor}
-	\end{twentyshort}\\
+	\section{Executables}
+
+		\begin{twentyshort}
+			\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
+				\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+			\BLOCK{endfor}
+		\end{twentyshort}\\
+	\BLOCK{endif}
 \BLOCK{endif}
 %----------------------------------------------------------------------------------------
 %	 SECOND PAGE EXAMPLE
