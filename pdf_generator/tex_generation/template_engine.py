@@ -127,6 +127,8 @@ def _count_this_mitigation(summary, mitigation):
     for selected_summary in summary:
         if mitigation in selected_summary:
             count += len(summary[selected_summary])
+    if count == 0:
+        count = 1
     return count
 
 
