@@ -133,10 +133,10 @@ def _count_this_mitigation(summary, mitigation):
 
 
 def software_components(software_string):
-    software = software_string
+    software = software_string.strip()
     ver_number = ''
-    if ' ' in software_string:
-        split_software_string = software_string.split(' ')
+    if ' ' in software:
+        split_software_string = software.split(' ')
         if len(split_software_string) > 2:
             software, ver_number = _larger_two_components(split_software_string)
         elif len(split_software_string[1]) > 0:

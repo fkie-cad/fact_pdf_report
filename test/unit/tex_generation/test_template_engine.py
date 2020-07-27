@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 from pdf_generator.tex_generation.template_engine import (
-    TemplateEngine, decode_base64_to_file, render_number_as_size, render_unix_time,
+    software_components, TemplateEngine, decode_base64_to_file, render_number_as_size, render_unix_time,
     replace_special_characters, get_five_longest_entries
 )
 
@@ -56,3 +56,15 @@ def test_get_five_longest_entries():
     longest_dict = get_five_longest_entries(TEST_DICT['file_type']['summary'], top=1)
     assert len(longest_dict) == 1
     assert 'compression/zlib' in longest_dict.keys()
+
+
+@pytest.mark.parametrize('test_input, expected_output', [
+    ('FOO 1.0', '1.0}{FOO'),
+    ('1.0 FOO', '1.0}{FOO'),
+    ('FOO BAR 1.0', '1.0}{FOOBAR'),
+    ('FOO', '}{FOO'),
+    ('  FOO  ', '}{FOO'),
+    ('  FOO  BAR  1.0  ', '1.0}{FOOBAR'),
+])
+def test_software_components(test_input, expected_output):
+    assert software_components(test_input) == expected_output
