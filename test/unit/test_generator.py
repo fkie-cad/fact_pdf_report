@@ -2,11 +2,11 @@ import json
 from pathlib import Path
 
 import pytest
+
 from pdf_generator.generator import (
-    LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, copy_fact_image, create_report_filename,
-    create_templates, execute_latex
+    copy_fact_image, create_report_filename, create_templates, execute_latex, LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE
 )
-from test.data.test_dict import TEST_DICT, META_DICT
+from test.data.test_dict import META_DICT, TEST_DICT
 
 
 class MockEngine:
@@ -15,7 +15,7 @@ class MockEngine:
 
     @staticmethod
     def render_main_template(analysis):
-        return '{}'.format(json.dumps(analysis))
+        return json.dumps(analysis)
 
     @staticmethod
     def render_meta_template(meta_data):
@@ -32,10 +32,11 @@ class MockEngine:
 
 def exec_mock(*_, **__):
     Path('test').write_text('works')
+    return '', 0
 
 
 def test_execute_latex(monkeypatch, tmpdir):
-    monkeypatch.setattr('pdf_generator.generator.execute_shell_command', exec_mock)
+    monkeypatch.setattr('pdf_generator.generator.execute_shell_command_get_return_code', exec_mock)
 
     execute_latex(str(tmpdir))
     assert Path(str(tmpdir), 'test').exists()

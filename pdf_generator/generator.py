@@ -1,10 +1,12 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 
-from common_helper_process import execute_shell_command
+from common_helper_process import execute_shell_command_get_return_code
+
 from pdf_generator.tex_generation.template_engine import (
-    LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, CUSTOM_TEMPLATE_CLASS, TemplateEngine
+    CUSTOM_TEMPLATE_CLASS, LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, TemplateEngine
 )
 
 PDF_NAME = Path(MAIN_TEMPLATE).with_suffix('.pdf').name
@@ -13,7 +15,10 @@ PDF_NAME = Path(MAIN_TEMPLATE).with_suffix('.pdf').name
 def execute_latex(tmp_dir):
     current_dir = os.getcwd()
     os.chdir(tmp_dir)
-    execute_shell_command('env buf_size=1000000 pdflatex {}'.format(MAIN_TEMPLATE))
+    output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex {}'.format(MAIN_TEMPLATE))
+    if return_code != 0:
+        print(f'Error when trying to build PDF:\n{output}')
+        sys.exit(1)
     os.chdir(current_dir)
 
 

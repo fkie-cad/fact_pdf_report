@@ -20,8 +20,9 @@
 import json
 import shutil
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from sys import exit as sys_exit
+from tempfile import TemporaryDirectory
+
 from pdf_generator.generator import compile_pdf, create_templates
 
 

@@ -1,22 +1,27 @@
+from pathlib import Path
+import shutil
+
 import PyPDF2
 
 from docker_entry import main as main_docker_entry
-import pathlib
-import shutil
-
 
 # pylint: disable=redefined-outer-name
+INTERFACE_DIR = Path('/tmp/interface')
+OUTPUT_FILE = INTERFACE_DIR / 'pdf' / 'A_devices_name_analysis_report.pdf'
+TEST_META_DATA = Path(__file__).parent / 'data' / 'meta.json'
+TEST_ANALYSIS_DATA = Path(__file__).parent / 'data' / 'analysis.json'
 
-def test_docker_entry(template_style='default'):
-    pathlib.Path("/tmp/interface/data").mkdir(parents=True, exist_ok=True)
-    pathlib.Path("/tmp/interface/pdf").mkdir(parents=True, exist_ok=True)
-    shutil.copyfile('data/analysis.json', '/tmp/interface/data/analysis.json')
-    shutil.copyfile('data/meta.json', '/tmp/interface/data/meta.json')
+
+def test_docker_entry():
+    (INTERFACE_DIR / 'data').mkdir(parents=True, exist_ok=True)
+    (INTERFACE_DIR / 'pdf').mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(TEST_ANALYSIS_DATA, INTERFACE_DIR / 'data' / 'analysis.json')
+    shutil.copyfile(TEST_META_DATA, INTERFACE_DIR / 'data' / 'meta.json')
     output = main_docker_entry()
+    assert output == 0, 'LaTeX PDF build unsuccessful'
 
+    assert OUTPUT_FILE.is_file()
     try:
-        PyPDF2.PdfFileReader(open('/tmp/interface/pdf/A_devices_name_analysis_report.pdf', "rb"))
+        PyPDF2.PdfFileReader(open(str(OUTPUT_FILE), 'rb'))
     except PyPDF2.utils.PdfReadError:
-        assert False
-    assert pathlib.Path('/tmp/interface/pdf/A_devices_name_analysis_report.pdf').exists()
-    assert output == 0
+        assert False, 'PDF could not be read'
