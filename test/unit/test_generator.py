@@ -2,10 +2,11 @@ import json
 from pathlib import Path
 
 import pytest
+
 from pdf_generator.generator import (
-    LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, PLUGIN_TEMPLATE_BLUEPRINT, copy_fact_image, create_report_filename,
-    create_templates, execute_latex, render_analysis_templates
+    copy_fact_image, create_report_filename, create_templates, execute_latex, LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE
 )
+from test.data.test_dict import META_DICT, TEST_DICT
 
 
 class MockEngine:
@@ -13,8 +14,8 @@ class MockEngine:
         pass
 
     @staticmethod
-    def render_main_template(analysis, meta_data):
-        return '{}\n{}'.format(json.dumps(analysis), json.dumps(meta_data))
+    def render_main_template(analysis):
+        return json.dumps(analysis)
 
     @staticmethod
     def render_meta_template(meta_data):
@@ -24,13 +25,18 @@ class MockEngine:
     def render_analysis_template(_, analysis):
         return json.dumps(analysis)
 
+    @staticmethod
+    def render_template_class():
+        return json.dumps('template_class.cls')
+
 
 def exec_mock(*_, **__):
     Path('test').write_text('works')
+    return '', 0
 
 
 def test_execute_latex(monkeypatch, tmpdir):
-    monkeypatch.setattr('pdf_generator.generator.execute_shell_command', exec_mock)
+    monkeypatch.setattr('pdf_generator.generator.execute_shell_command_get_return_code', exec_mock)
 
     execute_latex(str(tmpdir))
     assert Path(str(tmpdir), 'test').exists()
@@ -51,22 +57,9 @@ def test_create_report_filename(device_name, pdf_name):
     assert create_report_filename({'device_name': device_name}) == pdf_name
 
 
-def test_create_analysis_templates():
-    templates = render_analysis_templates(engine=MockEngine(), analysis={'test': {'result': 'data'}})
-
-    assert len(templates) == 1
-
-    filename, result_code = templates[0]
-    assert filename == PLUGIN_TEMPLATE_BLUEPRINT.format('test')
-    assert result_code == '{"result": "data"}'
-
-
 def test_create_templates(monkeypatch, tmpdir):
     monkeypatch.setattr('pdf_generator.generator.TemplateEngine', MockEngine)
-    create_templates(analysis={'test': {'result': 'data'}}, meta_data={}, tmp_dir=str(tmpdir))
+    create_templates(analysis=TEST_DICT, meta_data=META_DICT, tmp_dir=str(tmpdir))
 
     assert Path(str(tmpdir), MAIN_TEMPLATE).exists()
     assert Path(str(tmpdir), META_TEMPLATE).exists()
-    assert Path(str(tmpdir), PLUGIN_TEMPLATE_BLUEPRINT.format('test')).exists()
-
-    assert Path(str(tmpdir), PLUGIN_TEMPLATE_BLUEPRINT.format('test')).read_text() == '{"result": "data"}'

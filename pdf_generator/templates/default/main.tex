@@ -1,44 +1,181 @@
-\documentclass{article}
+% % % % % % % %
+% Twenty Seconds Resume/CV
+% LaTeX Template
+% Version 1.1 (8/1/17)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Carmine Spagnuolo (cspagnuolo@unisa.it) with major modifications by 
+% Vel (vel@LaTeXTemplates.com)
+%
+% License:
+% The MIT License (see included LICENSE file)
+%
+% % % % % % % %
 
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage{lmodern}
-\usepackage[a4paper, total={6in, 8in}]{geometry}
-\usepackage{longtable}
-\usepackage{sectsty}
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\batchmode
+\documentclass[letterpaper, icon]{twentysecondcv}
 
-\allsectionsfont{\sffamily}
+%----------------------------------------------------------------------------------------
+%	SIDE BAR
+%----------------------------------------------------------------------------------------
+
+\profilepic{fact.png}
+
+\input{meta.tex}
 
 \begin{document}
-
-\begin{titlepage}
-
-\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
-
-\center
-
-\includegraphics[width = 13cm]{fact_logo.png}\\[3cm]
-
-\HRule \\[0.4cm]
-{\fontfamily{lmss}\selectfont
-{\Large \bfseries Firmware Analysis of \VAR{meta_data['hid'] | filter_chars }}\\[0.4cm]
+%----------------------------------------------------------------------------------------
+%	CRYPTOGRAPHY
+%----------------------------------------------------------------------------------------
+\aboutme{
+\BLOCK{if 'crypto_material' in analysis}
+	\BLOCK{if analysis['crypto_material']['summary'] | length}
+		\BLOCK{for selected_summary in analysis['crypto_material']['summary']}
+			\VAR{selected_summary | filter_chars} \\
+		\BLOCK{endfor}
+	\BLOCK{endif}
+\BLOCK{else}
+    Analysis not present
+\BLOCK{endif}
 }
-\HRule \\[1.5cm]
+%----------------------------------------------------------------------------------------
+%	EXPLOIT MITIGATION
+%----------------------------------------------------------------------------------------
+\BLOCK{if 'exploit_mitigations' in analysis}
+	\BLOCK{if analysis['exploit_mitigations']['summary'] | length}
 
-\vspace{3.0cm}
+		\skills{\VAR{ analysis | call_for_mitigations}}
+	\BLOCK{endif}
+\BLOCK{else}
+    \skills{Analysis not present/1}
+\BLOCK{endif}
 
-{\fontfamily{lmss}\selectfont
-\input{meta.tex}
-}
+\makeprofile
+% ----------------------------------------------------------------------------------------------------------------------
+%  Binwalk & Entropy Graph
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'binwalk' in analysis}
+	\BLOCK{if 'entropy_analysis_graph' in analysis['binwalk']}
+		\BLOCK{if analysis['binwalk']['entropy_analysis_graph'] | length}
 
-\vfill
-\end{titlepage}
+			\includegraphics[width = \textwidth]{\VAR{analysis['binwalk']['entropy_analysis_graph'] | base64_to_png('entropy_analysis_graph', tmp_dir)}}
+		\BLOCK{endif}
+	\BLOCK{endif}
+\BLOCK{endif}
+% ----------------------------------------------------------------------------------------------------------------------
+%  Software Components
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'software_components' in analysis}
+	\BLOCK{if analysis['software_components']['summary'] | length}
+		\section{Software}
 
-\BLOCK{for current_analysis in analysis}
-    \input{\VAR{current_analysis}.tex}
-    \newpage
-\BLOCK{endfor}
+		\begin{twentyshort}
+			\BLOCK{for summary in analysis['software_components']['summary'] | sort | x_entires}
+			\twentyitemshort{\VAR{summary | split_space}}
+			\BLOCK{endfor}
+		\BLOCK{if analysis['software_components']['summary'] | elements_count > 10}
+			\twentyitemshort{}{and \VAR{analysis['software_components']['summary'] | elements_count - 10} others}
+		\BLOCK{endif}
+		\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  Known Vulnerabilities
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'known_vulnerabilities' in analysis}
+	\BLOCK{if analysis['known_vulnerabilities']['summary'] | length}
+		\section{Known Vulnerabilities}
 
-\end{document}
+		\begin{twentyshort}
+			\BLOCK{for known_vullies in analysis['known_vulnerabilities']['summary']}
+				\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
+			\BLOCK{endfor}
+		\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  CVE Lookup
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'cve_lookup' in analysis}
+	\BLOCK{if analysis['cve_lookup']['summary'] | length}
+		\section{CVE Lookup}
+
+		\begin{twentyshort}
+			\BLOCK{for cve in analysis['cve_lookup']['summary'] | cve_crits}
+				\twentyitemshort{\VAR{cve | filter_chars}}{}
+			\BLOCK{endfor}
+		\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  Top 5 File Types
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'file_type' in analysis}
+	\BLOCK{if analysis['file_type']['summary'] | length}
+		\section{Top five occuring file types}
+
+			\begin{twentyshort}
+			\BLOCK{for selected_summary in analysis['file_type']['summary'] | top_five}
+				\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+			\BLOCK{endfor}
+			\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}\\
+% ----------------------------------------------------------------------------------------------------------------------
+%  IP & URI
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'ip_and_uri_finder' in analysis}
+	\BLOCK{if analysis['ip_and_uri_finder']['summary'] | length}
+		\section{IPs and URIs}
+
+		\begin{twentyshort}
+			\BLOCK{for selected_analysis in analysis['ip_and_uri_finder']['summary'] | triplet}
+			    \twentyitemshort{\VAR{selected_analysis}}
+			\BLOCK{endfor}
+		\end{twentyshort}
+	\BLOCK{endif}
+\BLOCK{endif}
+% ----------------------------------------------------------------------------------------------------------------------
+%  Executables
+% ----------------------------------------------------------------------------------------------------------------------
+\BLOCK{if 'cpu_architecture' in analysis}
+	\BLOCK{if analysis['cpu_architecture']['summary'] | length}
+
+	\section{Executables}
+
+		\begin{twentyshort}
+			\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
+				\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
+			\BLOCK{endfor}
+		\end{twentyshort}\\
+	\BLOCK{endif}
+\BLOCK{endif}
+%----------------------------------------------------------------------------------------
+%	 SECOND PAGE EXAMPLE
+%----------------------------------------------------------------------------------------
+
+%\newpage % Start a new page
+
+%\makeprofile % Print the sidebar
+
+% \section{Other information}
+
+% \subsection{Review}
+
+% Alice approaches Wonderland as an anthropologist, but maintains a strong sense of noblesse oblige that comes with her class status. She has confidence in her social position, education, and the Victorian virtue of good manners. Alice has a feeling of entitlement, particularly when comparing herself to Mabel, whom she declares has a ``poky little house," and no toys. Additionally, she flaunts her limited information base with anyone who will listen and becomes increasingly obsessed with the importance of good manners as she deals with the rude creatures of Wonderland. Alice maintains a superior attitude and behaves with solicitous indulgence toward those she believes are less privileged.
+
+% \section{Other information}
+
+% \subsection{Review}
+
+% Alice approaches Wonderland as an anthropologist, but maintains a strong sense of noblesse oblige that comes with her class status. She has confidence in her social position, education, and the Victorian virtue of good manners. Alice has a feeling of entitlement, particularly when comparing herself to Mabel, whom she declares has a ``poky little house," and no toys. Additionally, she flaunts her limited information base with anyone who will listen and becomes increasingly obsessed with the importance of good manners as she deals with the rude creatures of Wonderland. Alice maintains a superior attitude and behaves with solicitous indulgence toward those she believes are less privileged.
+
+%----------------------------------------------------------------------------------------
+
+\end{document} 

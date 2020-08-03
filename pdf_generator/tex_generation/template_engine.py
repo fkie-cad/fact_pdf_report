@@ -1,18 +1,38 @@
-import logging
 from base64 import decodebytes
 from collections import OrderedDict
-from contextlib import suppress
 from pathlib import Path
 from time import localtime, strftime
 
+from random import choice
+import socket
 import jinja2
 from common_helper_files import human_readable_file_size
 
-GENERIC_TEMPLATE = 'generic.tex'
 MAIN_TEMPLATE = 'main.tex'
 META_TEMPLATE = 'meta.tex'
-PLUGIN_TEMPLATE_BLUEPRINT = '{}.tex'
-LOGO_FILE = 'fact_logo.png'
+CUSTOM_TEMPLATE_CLASS = 'twentysecondcv.cls'
+LOGO_FILE = 'fact.png'
+
+LATEX_CHARACTER_ESCAPES = OrderedDict([
+    ('\\', ''),
+    ('\'', ''),
+    ('$', '\\$'),
+    ('(', '$($'),
+    (')', '$)$'),
+    ('[', '$[$'),
+    (']', '$]$'),
+    ('#', '\\#'),
+    ('%', '\\%'),
+    ('&', '\\&'),
+    ('_', '\\_'),
+    ('{', '\\{'),
+    ('}', '\\}'),
+    ('^', '\\textasciicircum{}'),
+    ('~', '\\textasciitilde{}'),
+    ('>', '\\textgreater{}'),
+    ('<', '\\textless{}'),
+    ('\n', '\\newline ')
+])
 
 
 def render_number_as_size(number, verbose=True):
@@ -29,39 +49,8 @@ def render_unix_time(unix_time_stamp):
     return strftime('%Y-%m-%d %H:%M:%S', localtime(unix_time_stamp))
 
 
-def render_number_as_string(number):
-    if isinstance(number, int):
-        return '{:,}'.format(number)
-    if isinstance(number, float):
-        return '{:,.2f}'.format(number)
-    if isinstance(number, str):
-        with suppress(ValueError):
-            return str(int(number))
-    return 'not available'
-
-
 def replace_special_characters(data):
-    latex_character_escapes = OrderedDict()
-    latex_character_escapes['\\'] = ''
-    latex_character_escapes['\''] = ''
-    latex_character_escapes['$'] = '\\$'
-    latex_character_escapes['('] = '$($'
-    latex_character_escapes[')'] = '$)$'
-    latex_character_escapes['['] = '$[$'
-    latex_character_escapes[']'] = '$]$'
-    latex_character_escapes['#'] = '\\#'
-    latex_character_escapes['%'] = '\\%'
-    latex_character_escapes['&'] = '\\&'
-    latex_character_escapes['_'] = '\\_'
-    latex_character_escapes['{'] = '\\{'
-    latex_character_escapes['}'] = '\\}'
-    latex_character_escapes['^'] = '\\textasciicircum{}'
-    latex_character_escapes['~'] = '\\textasciitilde{}'
-    latex_character_escapes['>'] = '\\textgreater{}'
-    latex_character_escapes['<'] = '\\textless{}'
-    latex_character_escapes['\n'] = '\\newline '
-
-    for character, replacement in latex_character_escapes.items():
+    for character, replacement in LATEX_CHARACTER_ESCAPES.items():
         if character in data:
             data = data.replace(character, replacement)
     return data
@@ -73,33 +62,7 @@ def decode_base64_to_file(base64_string, filename, directory, suffix='png'):
     return str(file_path)
 
 
-def replace_characters_in_list(list_of_strings):
-    return [
-        replace_special_characters(item) for item in list_of_strings
-    ]
-
-
-def split_hash_string(hash_string, max_length=61):
-    if len(hash_string) > max_length:
-        hash_string = '{}\n{}'.format(hash_string[:max_length], hash_string[max_length:])
-    return hash_string
-
-
-def split_long_lines(multiline_string, max_length=92):
-    def evaluate_split(line):
-        return line if len(line) <= max_length else '{}\n{}'.format(line[:max_length], line[max_length:])
-
-    return ''.join(
-        evaluate_split(line) for line in multiline_string.splitlines(keepends=True)
-    )
-
-
-def item_contains_string(item, string):
-    if not isinstance(item, str):
-        return False
-    return string in item
-
-
+# X-Executable in summary
 def create_jinja_environment(templates_to_use='default'):
     template_directory = Path(Path(__file__).parent.parent, 'templates', templates_to_use)
     environment = jinja2.Environment(
@@ -119,23 +82,153 @@ def create_jinja_environment(templates_to_use='default'):
     return environment
 
 
-def plugin_name(name):
-    return ' '.join((part.title() for part in name.split('_')))
+def get_five_longest_entries(summary, top=5):
+    sorted_summary = dict()
+    if len(summary) < top + 1:
+        return summary
+    for key in sorted(summary, key=lambda key: len(summary[key]), reverse=True):
+        sorted_summary.update({key: summary[key]})
+        if len(sorted_summary) == top:
+            return sorted_summary
+    return sorted_summary
+
+
+def exploit_mitigation(summary):
+    summary = summary['exploit_mitigations']['summary']
+    max_count = _count_mitigations(summary)
+    numbers = dict()
+    for key in ['PIE', 'RELRO', 'Canary', 'NX', 'FORTIFY']:
+        numbers[key] = _count_occurrences(key, summary)
+    return (
+        f'{{CANARY/{numbers["Canary"] / max_count}}},{{PIE/{numbers["PIE"] / max_count}}},'
+        f'{{RELRO/{numbers["RELRO"] / max_count}}},{{NX/{numbers["NX"] / max_count}}},'
+        f'{{FORTIFY\\_SOURCE/{numbers["FORTIFY"] / max_count}}}'
+    )
+
+
+def _count_occurrences(key, summary):
+    return sum(
+        len(summary[entry])
+        for entry in summary
+        if key in entry and ('present' in entry or 'enabled' in entry)
+    )
+
+
+def _count_mitigations(summary):
+    for mitigation in ['Canary', 'NX', 'RELRO', 'PIE', 'FORTIFY']:
+        count = _count_this_mitigation(summary, mitigation)
+        if count != 0:
+            return count
+    if count == 0:
+        count = 1
+    return count
+
+
+def _count_this_mitigation(summary, mitigation):
+    count = 0
+    for selected_summary in summary:
+        if mitigation in selected_summary:
+            count += len(summary[selected_summary])
+    return count
+
+
+def software_components(software_string):
+    software = software_string.strip()
+    ver_number = ''
+    if ' ' in software:
+        split_software_string = software.split(' ')
+        if len(split_software_string) > 2:
+            software, ver_number = _larger_two_components(split_software_string)
+        elif len(split_software_string[1]) > 0:
+            software, ver_number = _less_three_components(split_software_string)
+    return f'{ver_number}}}{{{replace_special_characters(software)}'
+
+
+def _less_three_components(software_string):
+    software, ver_number = software_string
+    return _order_components(software, ver_number)
+
+
+def _larger_two_components(software_string):
+    software = ''.join(software_string[:-1])
+    ver_number = software_string[-1]
+    return _order_components(software, ver_number)
+
+
+def _order_components(software, ver_number):
+    try:
+        int(ver_number[0])
+    except ValueError:
+        return ver_number, software
+    return software, ver_number
+
+
+def get_triples(analysis):
+    combined_triples = []
+    for desired in ['IPv4', 'IPv6', 'URI ']:
+        combined_triples.append(_get_desired_triple(analysis, desired))
+    return combined_triples
+
+
+def _get_desired_triple(seleced_summary, which_desired):
+    desired_list = _ip_or_uri(seleced_summary, which_desired)
+    chosen_one = 'x x' * 60
+    while len(chosen_one) > 50:
+        chosen_one = choice(desired_list)
+    return f'{len(desired_list)}}}{{{which_desired}\\quad$\\>$ (incl. {replace_special_characters(chosen_one)})'
+
+
+def _ip_or_uri(summary, which_select):
+    new_list = []
+    for data in summary:
+        if ('URI ' in which_select and not _validate_ip(data, socket.AF_INET) and not _validate_ip(data,
+                                                                                                   socket.AF_INET6)):
+            new_list.append(data)
+        elif 'IPv4' in which_select and _validate_ip(data, socket.AF_INET):
+            new_list.append(data)
+        elif 'IPv6' in which_select and _validate_ip(data, socket.AF_INET6):
+            new_list.append(data)
+    return new_list
+
+
+def _validate_ip(ip, address_format):
+    try:
+        _ = socket.inet_pton(address_format, ip)
+        return True
+    except OSError:
+        return False
+
+
+def get_x_entries(summary, how_many=10):
+    if len(summary) <= how_many:
+        return summary
+    return summary[:how_many]
+
+
+def cve_criticals(summary):
+    f_string = []
+    else_count = len(summary)
+    for cve in summary:
+        if 'CRITICAL' in cve:
+            f_string.append(cve)
+            else_count -= 1
+    f_string.append(f'and {else_count} other uncritical')
+    return f_string
 
 
 def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
-    environment.filters['nice_number'] = render_number_as_string
     environment.filters['filter_chars'] = replace_special_characters
     environment.filters['elements_count'] = len
     environment.filters['base64_to_png'] = decode_base64_to_file
-    environment.filters['check_list'] = lambda x: x if x else ['list is empty']
-    environment.filters['plugin_name'] = plugin_name
-    environment.filters['filter_list'] = replace_characters_in_list
-    environment.filters['split_hash'] = split_hash_string
-    environment.filters['split_output_lines'] = split_long_lines
-    environment.filters['contains'] = item_contains_string
+    environment.filters['top_five'] = get_five_longest_entries
+    environment.filters['sort'] = sorted
+    environment.filters['call_for_mitigations'] = exploit_mitigation
+    environment.filters['split_space'] = software_components
+    environment.filters['triplet'] = get_triples
+    environment.filters['x_entires'] = get_x_entries
+    environment.filters['cve_crits'] = cve_criticals
 
 
 class TemplateEngine:
@@ -143,18 +236,14 @@ class TemplateEngine:
         self._environment = create_jinja_environment(template_folder if template_folder else 'default')
         self._tmp_dir = tmp_dir
 
-    def render_main_template(self, analysis, meta_data):
+    def render_main_template(self, analysis):
         template = self._environment.get_template(MAIN_TEMPLATE)
-        return template.render(analysis=analysis, meta_data=meta_data)
+        return template.render(analysis=analysis, tmp_dir=self._tmp_dir)
 
     def render_meta_template(self, meta_data):
         template = self._environment.get_template(META_TEMPLATE)
         return template.render(meta_data=meta_data)
 
-    def render_analysis_template(self, plugin, analysis):
-        try:
-            template = self._environment.get_template(PLUGIN_TEMPLATE_BLUEPRINT.format(plugin))
-        except jinja2.TemplateNotFound:
-            logging.warning('Falling back on generic template for {}'.format(plugin))
-            template = self._environment.get_template(GENERIC_TEMPLATE)
-        return template.render(plugin_name=plugin, selected_analysis=analysis, tmp_dir=self._tmp_dir)
+    def render_template_class(self):
+        template = self._environment.get_template(CUSTOM_TEMPLATE_CLASS)
+        return template.render(tmp_dir=self._tmp_dir)
