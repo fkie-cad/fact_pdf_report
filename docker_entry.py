@@ -40,8 +40,11 @@ def main(template_style='default'):
 
     with TemporaryDirectory() as tmp_dir:
         create_templates(analysis, meta_data, tmp_dir, template_style)
-        target_path = compile_pdf(meta_data, tmp_dir)
-        move_pdf_report(target_path)
+        try:
+            target_path = compile_pdf(meta_data, tmp_dir)
+            move_pdf_report(target_path)
+        except RuntimeError:
+            pass
 
     return 0
 

@@ -1,6 +1,5 @@
 import os
 import shutil
-import sys
 from pathlib import Path
 
 from common_helper_process import execute_shell_command_get_return_code
@@ -17,8 +16,9 @@ def execute_latex(tmp_dir):
     os.chdir(tmp_dir)
     output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex {}'.format(MAIN_TEMPLATE))
     if return_code != 0:
-        print(f'Error when trying to build PDF:\n{output}')
-        sys.exit(1)
+        print(f'Warnings / Errors when trying to build PDF:\n{output}')
+        if not Path('main.pdf').exists():
+            raise RuntimeError('No pdf output generated. Aborting.')
     os.chdir(current_dir)
 
 
