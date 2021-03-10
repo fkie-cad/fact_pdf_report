@@ -76,7 +76,7 @@
 		\section{Software}
 
 		\begin{twentyshort}
-			\BLOCK{for summary in analysis['software_components']['summary'] | sort | x_entires}
+			\BLOCK{for summary in analysis['software_components']['summary'] | sort | x_entries}
 			\twentyitemshort{\VAR{summary | split_space}}
 			\BLOCK{endfor}
 		\BLOCK{if analysis['software_components']['summary'] | elements_count > 10}

@@ -170,8 +170,8 @@ def get_triples(analysis):
     return combined_triples
 
 
-def _get_desired_triple(seleced_summary, which_desired):
-    desired_list = _ip_or_uri(seleced_summary, which_desired)
+def _get_desired_triple(selected_summary, which_desired):
+    desired_list = _ip_or_uri(selected_summary, which_desired)
     chosen_one = 'x x' * 60
     while len(chosen_one) > 50:
         chosen_one = choice(desired_list)
@@ -227,7 +227,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['call_for_mitigations'] = exploit_mitigation
     environment.filters['split_space'] = software_components
     environment.filters['triplet'] = get_triples
-    environment.filters['x_entires'] = get_x_entries
+    environment.filters['x_entries'] = get_x_entries
     environment.filters['cve_crits'] = cve_criticals
 
 
