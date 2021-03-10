@@ -26,17 +26,23 @@ from tempfile import TemporaryDirectory
 from pdf_generator.generator import compile_pdf, create_templates
 
 
-def get_data():
-    return json.loads(Path('/tmp', 'interface', 'data', 'analysis.json').read_text()), json.loads(
-        Path('/tmp', 'interface', 'data', 'meta.json').read_text())
+INPUT_DIR = Path('/tmp/interface')
 
 
-def move_pdf_report(pdf_path):
-    shutil.move(str(pdf_path.absolute()), str(Path('/tmp', 'interface', 'pdf', pdf_path.name)))
+def _load_data(file_name: str) -> dict:
+    return json.loads((INPUT_DIR / 'data' / file_name).read_text())
+
+
+def move_pdf_report(pdf_path: Path):
+    output_path = INPUT_DIR / 'pdf' / pdf_path.name
+    shutil.move(pdf_path, output_path)
+    file_stats = INPUT_DIR.lstat()
+    shutil.chown(output_path, user=file_stats.st_uid, group=file_stats.st_gid)
 
 
 def main(template_style='default'):
-    analysis, meta_data = get_data()
+    analysis = _load_data('analysis.json')
+    meta_data = _load_data('meta.json')
 
     with TemporaryDirectory() as tmp_dir:
         create_templates(analysis, meta_data, tmp_dir, template_style)
