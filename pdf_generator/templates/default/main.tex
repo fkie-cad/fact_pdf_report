@@ -135,7 +135,7 @@
 		\section{IPs and URIs}
 
 		\begin{twentyshort}
-			\BLOCK{for selected_analysis in analysis['ip_and_uri_finder']['summary'] | triplet}
+			\BLOCK{for selected_analysis in analysis['ip_and_uri_finder']['summary'] | aggregate_ip_stats}
 			    \twentyitemshort{\VAR{selected_analysis}}
 			\BLOCK{endfor}
 		\end{twentyshort}

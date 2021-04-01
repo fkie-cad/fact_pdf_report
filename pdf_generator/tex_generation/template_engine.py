@@ -5,6 +5,8 @@ from time import localtime, strftime
 
 from random import choice
 import socket
+from typing import List
+
 import jinja2
 from common_helper_files import human_readable_file_size
 
@@ -163,32 +165,42 @@ def _order_components(software, ver_number):
     return software, ver_number
 
 
-def get_triples(analysis):
-    combined_triples = []
-    for desired in ['IPv4', 'IPv6', 'URI ']:
-        combined_triples.append(_get_desired_triple(analysis, desired))
-    return combined_triples
+def aggregate_ip_stats(summary_of_ip_analysis: dict) -> List[str]:
+    uris, ipv4s, ipv6s = _sort_ip_analysis_results(summary_of_ip_analysis)
+    return [
+        _aggregate_ip_class(ipv4s, 'IPv4'),
+        _aggregate_ip_class(ipv6s, 'IPv6'),
+        _aggregate_ip_class(uris, 'URI'),
+    ]
 
 
-def _get_desired_triple(selected_summary, which_desired):
-    desired_list = _ip_or_uri(selected_summary, which_desired)
-    chosen_one = 'x x' * 60
-    while len(chosen_one) > 50:
-        chosen_one = choice(desired_list)
-    return f'{len(desired_list)}}}{{{which_desired}\\quad$\\>$ (incl. {replace_special_characters(chosen_one)})'
+def _aggregate_ip_class(elements_of_ip_class, ip_class):
+    if not elements_of_ip_class:
+        return f'0}}{{{ip_class}\\quad$\\>$'
+
+    return (
+        f'{len(elements_of_ip_class)}}}{{{ip_class}\\quad$\\>$ '
+        f'(incl. {replace_special_characters(_find_short_element(elements_of_ip_class, 50))})'
+    )
 
 
-def _ip_or_uri(summary, which_select):
-    new_list = []
-    for data in summary:
-        if ('URI ' in which_select and not _validate_ip(data, socket.AF_INET) and not _validate_ip(data,
-                                                                                                   socket.AF_INET6)):
-            new_list.append(data)
-        elif 'IPv4' in which_select and _validate_ip(data, socket.AF_INET):
-            new_list.append(data)
-        elif 'IPv6' in which_select and _validate_ip(data, socket.AF_INET6):
-            new_list.append(data)
-    return new_list
+def _find_short_element(elements_of_ip_class, max_length):
+    for element in elements_of_ip_class:
+        if len(element) <= max_length:
+            return element
+    return elements_of_ip_class[0][:51]
+
+
+def _sort_ip_analysis_results(summary_of_ip_analysis):
+    uris, ipv4s, ipv6s = [], [], []
+    for element in summary_of_ip_analysis:
+        if not _validate_ip(element, socket.AF_INET) and not _validate_ip(element, socket.AF_INET6):
+            uris.append(element)
+        elif _validate_ip(element, socket.AF_INET):
+            ipv4s.append(element)
+        else:
+            ipv6s.append(element)
+    return uris, ipv4s, ipv6s
 
 
 def _validate_ip(ip, address_format):
@@ -226,7 +238,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['sort'] = sorted
     environment.filters['call_for_mitigations'] = exploit_mitigation
     environment.filters['split_space'] = software_components
-    environment.filters['triplet'] = get_triples
+    environment.filters['aggregate_ip_stats'] = aggregate_ip_stats
     environment.filters['x_entries'] = get_x_entries
     environment.filters['cve_crits'] = cve_criticals
 
