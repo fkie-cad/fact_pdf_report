@@ -16,7 +16,8 @@ def execute_latex(tmp_dir):
     os.chdir(tmp_dir)
     output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex {}'.format(MAIN_TEMPLATE))
     if return_code != 0:
-        print(f'Warnings / Errors when trying to build PDF:\n{output}')
+        error_log = output if not Path('main.log').is_file() else Path('main.log').read_text()
+        print(f'Warnings / Errors when trying to build PDF:\n{error_log}')
         if not Path('main.pdf').exists():
             raise RuntimeError('No pdf output generated. Aborting.')
     os.chdir(current_dir)

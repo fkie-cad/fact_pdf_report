@@ -10,6 +10,6 @@ install:
   - "pip install -r requirements-dev.txt"
   - "pip install codecov"
 # command to run tests
-script: "pytest"
+script: "pytest -v"
 after_success:
 - codecov
