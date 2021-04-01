@@ -3,7 +3,8 @@ python:
   - "3.6"
   - "3.7"
 # command to install dependencies
-install: 
+install:
+  - "apt-get install -y texlive-fonts-extra texlive-latex-recommended"
   - "pip install -r requirements.txt"
   - "pip install -r requirements-dev.txt"
   - "pip install codecov"
