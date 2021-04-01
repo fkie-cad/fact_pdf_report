@@ -2,13 +2,14 @@ language: python
 python:
   - "3.6"
   - "3.7"
-# command to install dependencies
+before_install:
+  - "sudo apt-get update"
 install:
-  - "apt-get install -y texlive-fonts-extra texlive-latex-recommended"
+  - "sudo apt-get install -y texlive-fonts-extra texlive-latex-extra texlive-latex-recommended"
   - "pip install -r requirements.txt"
   - "pip install -r requirements-dev.txt"
   - "pip install codecov"
 # command to run tests
-script: "pytest"
+script: "pytest -v"
 after_success:
 - codecov
