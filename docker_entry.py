@@ -44,7 +44,7 @@ def main(template_style='default'):
             target_path = compile_pdf(meta_data, tmp_dir)
             move_pdf_report(target_path)
         except RuntimeError:
-            pass
+            return 1
 
     return 0
 
