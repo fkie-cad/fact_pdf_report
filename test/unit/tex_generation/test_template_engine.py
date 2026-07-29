@@ -1,17 +1,22 @@
 from pathlib import Path
 
 import pytest
-from pdf_generator.tex_generation.template_engine import (
-    software_components, TemplateEngine, decode_base64_to_file, render_number_as_size, render_unix_time,
-    replace_special_characters, get_five_longest_entries
-)
 
+from pdf_generator.tex_generation.template_engine import (
+    TemplateEngine,
+    decode_base64_to_file,
+    get_five_longest_entries,
+    render_number_as_size,
+    render_unix_time,
+    replace_special_characters,
+    software_components,
+)
 from test.data.test_dict import TEST_DICT
 
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def stub_engine(tmpdir):
     return TemplateEngine(template_folder='test', tmp_dir=tmpdir)
 
@@ -19,7 +24,7 @@ def stub_engine(tmpdir):
 def test_byte_number_filter():
     assert render_number_as_size(None) == 'not available'
 
-    assert render_number_as_size(12, verbose=False) == '12.00 Byte'
+    assert render_number_as_size(12, verbose=False) == '12.00 B'
     assert render_number_as_size(128000) == '125.00 KiB (128,000 Byte)'
     assert render_number_as_size(128000, verbose=False) == '125.00 KiB'
 
@@ -55,16 +60,19 @@ def test_get_five_longest_entries():
     assert len(get_five_longest_entries(TEST_DICT['file_type']['summary'], top=3)) <= 3
     longest_dict = get_five_longest_entries(TEST_DICT['file_type']['summary'], top=1)
     assert len(longest_dict) == 1
-    assert 'compression/zlib' in longest_dict.keys()
+    assert 'compression/zlib' in longest_dict
 
 
-@pytest.mark.parametrize('test_input, expected_output', [
-    ('FOO 1.0', '1.0}{FOO'),
-    ('1.0 FOO', '1.0}{FOO'),
-    ('FOO BAR 1.0', '1.0}{FOOBAR'),
-    ('FOO', '}{FOO'),
-    ('  FOO  ', '}{FOO'),
-    ('  FOO  BAR  1.0  ', '1.0}{FOOBAR'),
-])
+@pytest.mark.parametrize(
+    ('test_input', 'expected_output'),
+    [
+        ('FOO 1.0', '1.0}{FOO'),
+        ('1.0 FOO', '1.0}{FOO'),
+        ('FOO BAR 1.0', '1.0}{FOOBAR'),
+        ('FOO', '}{FOO'),
+        ('  FOO  ', '}{FOO'),
+        ('  FOO  BAR  1.0  ', '1.0}{FOOBAR'),
+    ],
+)
 def test_software_components(test_input, expected_output):
     assert software_components(test_input) == expected_output

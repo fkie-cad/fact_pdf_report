@@ -4,7 +4,13 @@ from pathlib import Path
 import pytest
 
 from pdf_generator.generator import (
-    copy_fact_image, create_report_filename, create_templates, execute_latex, LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE
+    LOGO_FILE,
+    MAIN_TEMPLATE,
+    META_TEMPLATE,
+    copy_fact_image,
+    create_report_filename,
+    create_templates,
+    execute_latex,
 )
 from test.data.test_dict import META_DICT, TEST_DICT
 
@@ -48,11 +54,14 @@ def test_copy_fact_image(tmpdir):
     assert Path(str(tmpdir), LOGO_FILE).exists()
 
 
-@pytest.mark.parametrize('device_name, pdf_name', [
-    ('simple', 'simple_analysis_report.pdf'),
-    ('harder name', 'harder_name_analysis_report.pdf'),
-    ('dangerous/name', 'dangerous__name_analysis_report.pdf')
-])
+@pytest.mark.parametrize(
+    ('device_name', 'pdf_name'),
+    [
+        ('simple', 'simple_analysis_report.pdf'),
+        ('harder name', 'harder_name_analysis_report.pdf'),
+        ('dangerous/name', 'dangerous__name_analysis_report.pdf'),
+    ],
+)
 def test_create_report_filename(device_name, pdf_name):
     assert create_report_filename({'device_name': device_name}) == pdf_name
 
