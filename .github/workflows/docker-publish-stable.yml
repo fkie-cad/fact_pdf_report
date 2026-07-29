@@ -1,0 +1,48 @@
+name: Publish Docker images for release versions
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get tag name
+        uses: olegtarasov/get-tag@v2.1
+        id: tagName
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to ghcr.io Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: |
+            linux/amd64
+            linux/arm64
+          push: true
+          tags: |
+            ghcr.io/fkie-cad/fact_pdf_report:${{ steps.tagName.outputs.tag }}
+            fkiecad/fact_pdf_report:${{ steps.tagName.outputs.tag }}
