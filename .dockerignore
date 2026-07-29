@@ -1,0 +1,51 @@
+# Version control
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.project
+.pydevproject
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Virtual environments
+.env
+.venv
+venv
+ENV
+env
+
+# Testing
+.pytest_cache
+.coverage
+.coverage.*
+htmlcov
+.tox
+.hypothesis
+
+# Docs
+docs/_build
+site
+
+# Cache
+.mypy_cache
+.ruff_cache
+.cache
+
+# OS
+.DS_Store
+Thumbs.db
