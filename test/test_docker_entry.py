@@ -1,7 +1,8 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import PyPDF2
+import pytest
 
 from docker_entry import main as main_docker_entry
 
@@ -22,6 +23,7 @@ def test_docker_entry():
 
     assert OUTPUT_FILE.is_file()
     try:
-        PyPDF2.PdfFileReader(open(str(OUTPUT_FILE), 'rb'))
-    except PyPDF2.utils.PdfReadError:
-        assert False, 'PDF could not be read'
+        with OUTPUT_FILE.open('rb') as f:
+            PyPDF2.PdfReader(f)
+    except Exception:
+        pytest.fail('PDF could not be read')

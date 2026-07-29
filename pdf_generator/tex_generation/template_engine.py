@@ -1,11 +1,8 @@
+import socket
 from base64 import decodebytes
 from collections import OrderedDict
 from pathlib import Path
 from time import localtime, strftime
-
-from random import choice
-import socket
-from typing import List
 
 import jinja2
 from common_helper_files import human_readable_file_size
@@ -15,33 +12,35 @@ META_TEMPLATE = 'meta.tex'
 CUSTOM_TEMPLATE_CLASS = 'twentysecondcv.cls'
 LOGO_FILE = 'fact.png'
 
-LATEX_CHARACTER_ESCAPES = OrderedDict([
-    ('\\', ''),
-    ('\'', ''),
-    ('$', '\\$'),
-    ('(', '$($'),
-    (')', '$)$'),
-    ('[', '$[$'),
-    (']', '$]$'),
-    ('#', '\\#'),
-    ('%', '\\%'),
-    ('&', '\\&'),
-    ('_', '\\_'),
-    ('{', '\\{'),
-    ('}', '\\}'),
-    ('^', '\\textasciicircum{}'),
-    ('~', '\\textasciitilde{}'),
-    ('>', '\\textgreater{}'),
-    ('<', '\\textless{}'),
-    ('\n', '\\newline ')
-])
+LATEX_CHARACTER_ESCAPES = OrderedDict(
+    [
+        ('\\', ''),
+        ("'", ''),
+        ('$', '\\$'),
+        ('(', '$($'),
+        (')', '$)$'),
+        ('[', '$[$'),
+        (']', '$]$'),
+        ('#', '\\#'),
+        ('%', '\\%'),
+        ('&', '\\&'),
+        ('_', '\\_'),
+        ('{', '\\{'),
+        ('}', '\\}'),
+        ('^', '\\textasciicircum{}'),
+        ('~', '\\textasciitilde{}'),
+        ('>', '\\textgreater{}'),
+        ('<', '\\textless{}'),
+        ('\n', '\\newline '),
+    ]
+)
 
 
 def render_number_as_size(number, verbose=True):
     if not isinstance(number, (int, float)):
         return 'not available'
     if verbose:
-        return '{} ({})'.format(human_readable_file_size(int(number)), format(number, ',d') + ' Byte')
+        return f'{human_readable_file_size(int(number))} ({format(number, ",d") + " Byte"})'
     return human_readable_file_size(int(number))
 
 
@@ -59,7 +58,7 @@ def replace_special_characters(data):
 
 
 def decode_base64_to_file(base64_string, filename, directory, suffix='png'):
-    file_path = Path(directory, '{}.{}'.format(filename, suffix))
+    file_path = Path(directory, f'{filename}.{suffix}')
     file_path.write_bytes(decodebytes(base64_string.encode('utf-8')))
     return str(file_path)
 
@@ -78,7 +77,7 @@ def create_jinja_environment(templates_to_use='default'):
         line_comment_prefix='%#',
         trim_blocks=True,
         autoescape=False,
-        loader=jinja2.FileSystemLoader(str(template_directory))
+        loader=jinja2.FileSystemLoader(str(template_directory)),
     )
     _add_filters_to_jinja(environment)
     return environment
@@ -109,11 +108,7 @@ def exploit_mitigation(summary):
 
 
 def _count_occurrences(key, summary):
-    return sum(
-        len(summary[entry])
-        for entry in summary
-        if key in entry and ('present' in entry or 'enabled' in entry)
-    )
+    return sum(len(summary[entry]) for entry in summary if key in entry and ('present' in entry or 'enabled' in entry))
 
 
 def _count_mitigations(summary):
@@ -143,7 +138,7 @@ def software_components(software_string):
             software, ver_number = _larger_two_components(split_software_string)
         elif len(split_software_string[1]) > 0:
             software, ver_number = _less_three_components(split_software_string)
-    return f'{ver_number}}}{{{replace_special_characters(software)}'
+    return f'{replace_special_characters(ver_number)}}}{{{replace_special_characters(software)}'
 
 
 def _less_three_components(software_string):
@@ -165,7 +160,7 @@ def _order_components(software, ver_number):
     return software, ver_number
 
 
-def aggregate_ip_stats(summary_of_ip_analysis: dict) -> List[str]:
+def aggregate_ip_stats(summary_of_ip_analysis: dict) -> list[str]:
     uris, ipv4s, ipv6s = _sort_ip_analysis_results(summary_of_ip_analysis)
     return [
         _aggregate_ip_class(ipv4s, 'IPv4'),
@@ -245,7 +240,7 @@ def _add_filters_to_jinja(environment):
 
 class TemplateEngine:
     def __init__(self, template_folder=None, tmp_dir=None):
-        self._environment = create_jinja_environment(template_folder if template_folder else 'default')
+        self._environment = create_jinja_environment(template_folder or 'default')
         self._tmp_dir = tmp_dir
 
     def render_main_template(self, analysis):

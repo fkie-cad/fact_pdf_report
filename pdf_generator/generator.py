@@ -5,7 +5,11 @@ from pathlib import Path
 from common_helper_process import execute_shell_command_get_return_code
 
 from pdf_generator.tex_generation.template_engine import (
-    CUSTOM_TEMPLATE_CLASS, LOGO_FILE, MAIN_TEMPLATE, META_TEMPLATE, TemplateEngine
+    CUSTOM_TEMPLATE_CLASS,
+    LOGO_FILE,
+    MAIN_TEMPLATE,
+    META_TEMPLATE,
+    TemplateEngine,
 )
 
 PDF_NAME = Path(MAIN_TEMPLATE).with_suffix('.pdf').name
@@ -14,7 +18,9 @@ PDF_NAME = Path(MAIN_TEMPLATE).with_suffix('.pdf').name
 def execute_latex(tmp_dir):
     current_dir = os.getcwd()
     os.chdir(tmp_dir)
-    output, return_code = execute_shell_command_get_return_code('env buf_size=1000000 pdflatex {}'.format(MAIN_TEMPLATE))
+    output, return_code = execute_shell_command_get_return_code(
+        f'env buf_size=1000000 pdflatex -interaction=nonstopmode -halt-on-error {MAIN_TEMPLATE}'
+    )
     if return_code != 0:
         error_log = output if not Path('main.log').is_file() else Path('main.log').read_text()
         print(f'Warnings / Errors when trying to build PDF:\n{error_log}')
@@ -28,7 +34,7 @@ def copy_fact_image(target):
 
 
 def create_report_filename(meta_data):
-    unsafe_name = '{}_analysis_report.pdf'.format(meta_data['device_name'])
+    unsafe_name = f'{meta_data["device_name"]}_analysis_report.pdf'
     safer_name = unsafe_name.replace(' ', '_').replace('/', '__')
     return safer_name.encode('latin-1', errors='ignore').decode('latin-1')
 
