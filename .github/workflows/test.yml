@@ -1,0 +1,15 @@
+name: Tests
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build Docker image
+        run: docker build -t pdf-generator:test .
+
+      - name: Run tests
+        run: docker run --entrypoint sh pdf-generator:test -c "uv sync --extra dev && uv run pytest"
