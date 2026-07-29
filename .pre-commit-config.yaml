@@ -1,53 +1,55 @@
-default_stages: [commit, push]
+default_stages: [ pre-commit, pre-push ]
+exclude: ^src/(bin/|web_interface/static/package-lock.json)
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.1.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-    -   id: check-added-large-files
-        args: [--maxkb=10000]
+      - id: check-added-large-files
+        args: [ --maxkb=10000 ]
 
-    -   id: check-json
+      - id: check-json
 
-    -   id: check-merge-conflict
+      - id: check-merge-conflict
 
-    -   id: check-yaml
+      - id: check-toml
 
-    -   id: end-of-file-fixer
-        types: [python]
+      - id: check-yaml
 
-    -   id: fix-encoding-pragma
-        args: [--remove]
+      - id: file-contents-sorter
+        files: src/unpacker/passwords|_list.txt
 
-    -   id: file-contents-sorter
-        files: src/unpacker/passwords|.gitignore|_list.txt
+      - id: forbid-new-submodules
 
-    -   id: flake8
-        args: [--ignore="E501,W503", --select=W504]
+      - id: no-commit-to-branch
 
-    -   id: forbid-new-submodules
+      - id: pretty-format-json
+        args: [ --autofix ]
+        exclude: ^src/web_interface/static/package-lock.json
 
-    -   id: no-commit-to-branch
-
-    -   id: pretty-format-json
-        args: [--autofix]
-
-    -   id: trailing-whitespace
-        types: [python]
-
-
--   repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v2.2.2
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
     hooks:
-    -   id: pylint
-        language: system
-        args: [--rcfile=.pylintrc]
+      - id: shellcheck
 
--   repo: https://github.com/pre-commit/mirrors-jshint
-    rev: v2.10.2
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
     hooks:
-    -   id: jshint
+      - id: hadolint-docker
 
--   repo: https://github.com/pre-commit/mirrors-isort
-    rev: v4.3.20
+  - repo: https://github.com/pre-commit/mirrors-jshint
+    rev: v2.13.6
     hooks:
-    -   id: isort
+      - id: jshint
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.15.6'
+    hooks:
+      - id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]
+      - id: ruff-format
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.44.0
+    hooks:
+      - id: markdownlint
+        args: [ "--config", ".markdownlint.yaml" ]
