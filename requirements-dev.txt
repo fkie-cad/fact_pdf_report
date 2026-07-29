@@ -1,4 +1,0 @@
-pytest
-pytest-cov
-pre-commit
-PyPDF2

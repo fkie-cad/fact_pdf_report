@@ -1,0 +1,127 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project]
+name = "pdf-generator"
+version = "1.0.0"
+description = "PDF report generator for FACT analysis"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "jinja2",
+    "common_helper_files @ git+https://github.com/fkie-cad/common_helper_files.git",
+    "common_helper_process @ git+https://github.com/fkie-cad/common_helper_process.git",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "PyPDF2",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+addopts = "-v"
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "venv",
+]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "ERA",
+    "YTT",
+    "ANN",
+    "S",
+    "B",
+    "A",
+    "C4",
+    "EXE",
+    "FIX",
+    "ISC",
+    "PIE",
+    "T20",
+    "PT",
+    "Q",
+    "RET",
+    "SIM",
+    "TC",
+    "ARG",
+    "PTH",
+    "I",
+    "C90",
+    "N",
+    "PERF",
+    "E",
+    "W",
+    "F",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "UP",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "A003",
+    "ANN002",
+    "ANN003",
+    "ANN204",
+    "ANN401",
+    "C408",
+    "C420",
+    "PERF203",
+    "PERF401",
+    "PLR2004",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF015",
+    "FIX001",
+    "FIX004",
+    "ISC001",
+    "Q001",
+    "S701",
+    "SIM109",
+    "T201",
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"test*.py" = ["ARG002", "PLR2004", "ANN", "S101", "S108"]
+"test/data/*.py" = ["ARG002", "PLR2004", "ANN", "S101", "S108", "Q000"]
+"pdf_generator/**/*.py" = ["ANN", "PTH"]
+"docker_entry.py" = ["ANN", "S108"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pdf_generator", "test"]
+
+[tool.ruff.lint.pylint]
+max-args = 7
+max-public-methods = 40
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+docstring-quotes = "double"
+
+[tool.ruff.format]
+quote-style = "single"
