@@ -83,8 +83,9 @@
 			\twentyitemshort{}{and \VAR{analysis['software_components']['summary'] | elements_count - 10} others}
 		\BLOCK{endif}
 		\end{twentyshort}
+		\par\bigskip
 	\BLOCK{endif}
-\BLOCK{endif}\\
+\BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  Known Vulnerabilities
 % ----------------------------------------------------------------------------------------------------------------------
@@ -97,8 +98,9 @@
 				\twentyitemshort{\VAR{known_vullies | filter_chars}}{}
 			\BLOCK{endfor}
 		\end{twentyshort}
+		\par\bigskip
 	\BLOCK{endif}
-\BLOCK{endif}\\
+\BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  CVE Lookup
 % ----------------------------------------------------------------------------------------------------------------------
@@ -111,8 +113,9 @@
 				\twentyitemshort{\VAR{cve | filter_chars}}{}
 			\BLOCK{endfor}
 		\end{twentyshort}
+		\par\bigskip
 	\BLOCK{endif}
-\BLOCK{endif}\\
+\BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  Top 5 File Types
 % ----------------------------------------------------------------------------------------------------------------------
@@ -125,8 +128,9 @@
 				\twentyitemshort{\VAR{analysis['file_type']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
 			\BLOCK{endfor}
 			\end{twentyshort}
+			\par\bigskip
 	\BLOCK{endif}
-\BLOCK{endif}\\
+\BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
 %  IP & URI
 % ----------------------------------------------------------------------------------------------------------------------
@@ -139,6 +143,7 @@
 			    \twentyitemshort{\VAR{selected_analysis}}
 			\BLOCK{endfor}
 		\end{twentyshort}
+		\par\bigskip
 	\BLOCK{endif}
 \BLOCK{endif}
 % ----------------------------------------------------------------------------------------------------------------------
@@ -153,7 +158,8 @@
 			\BLOCK{for selected_summary in analysis['cpu_architecture']['summary']}
 				\twentyitemshort{\VAR{analysis['cpu_architecture']['summary'][selected_summary] | elements_count}}{\VAR{selected_summary | filter_chars}}
 			\BLOCK{endfor}
-		\end{twentyshort}\\
+		\end{twentyshort}
+		\par\bigskip
 	\BLOCK{endif}
 \BLOCK{endif}
 %----------------------------------------------------------------------------------------
