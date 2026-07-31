@@ -374,7 +374,7 @@ wheels = [
 
 [[package]]
 name = "pdf-generator"
-version = "0.0.0"
+version = "1.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "common-helper-files" },
