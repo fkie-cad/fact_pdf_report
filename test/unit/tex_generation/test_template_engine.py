@@ -4,6 +4,7 @@ import pytest
 
 from pdf_generator.tex_generation.template_engine import (
     TemplateEngine,
+    allow_breaks,
     decode_base64_to_file,
     get_five_longest_entries,
     render_number_as_size,
@@ -46,6 +47,11 @@ def test_filter_latex_special_chars():
 
     assert replace_special_characters(r'C:\Windows') == r'C:Windows'
     assert replace_special_characters(r'100 $') == r'100 \$'
+
+
+def test_allow_breaks():
+    assert allow_breaks('safe') == 'safe'
+    assert allow_breaks(r'a\_b.c-d/e') == r'a\_\allowbreak{}b.\allowbreak{}c-\allowbreak{}d/\allowbreak{}e'
 
 
 def test_render_meta_template(stub_engine):
