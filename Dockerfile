@@ -10,18 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget perl fontconfig git \
     && rm -rf /var/lib/apt/lists/*
 
-# TeX Live mirrors are occasionally unreachable or serve broken certificates, so network steps are retried
-# hadolint ignore=SC2016
-RUN printf '%s\n' \
-        '#!/bin/bash' \
-        'for attempt in 1 2 3 4 5; do' \
-        '    "$@" && exit 0' \
-        '    echo "attempt ${attempt}/5 failed: $*" >&2' \
-        '    sleep $((attempt * 10))' \
-        'done' \
-        'exit 1' \
-        > /usr/local/bin/retry \
- && chmod +x /usr/local/bin/retry
+# network steps for TeX Live are retried because the mirrors are sometimes flaky
+COPY --chmod=755 docker/retry.sh /usr/local/bin/retry
 
 # Pinned TeX Live release: mirror.ctan.org redirects to a random mirror (which is what makes retries useful) and always
 # serves the latest release. Once TeX Live moves on to a newer release, the build fails on purpose. To keep building
