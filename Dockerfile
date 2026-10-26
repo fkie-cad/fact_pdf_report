@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/usr/local/texlive/bin:${PATH}"
-RUN wget -qO /tmp/install-tl.tar.gz \
+RUN wget -nv -O /tmp/install-tl.tar.gz \
         https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz \
  && mkdir /tmp/install-tl && tar -xzf /tmp/install-tl.tar.gz -C /tmp/install-tl --strip-components=1 \
  && printf '%s\n' \
