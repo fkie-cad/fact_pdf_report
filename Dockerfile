@@ -10,44 +10,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget perl fontconfig git \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/usr/local/texlive/bin:${PATH}"
-RUN wget -qO /tmp/install-tl.tar.gz \
-        https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz \
- && mkdir /tmp/install-tl && tar -xzf /tmp/install-tl.tar.gz -C /tmp/install-tl --strip-components=1 \
- && printf '%s\n' \
-        'selected_scheme scheme-infraonly' \
-        'TEXDIR /usr/local/texlive' \
-        'TEXMFLOCAL /usr/local/texlive/texmf-local' \
-        'TEXMFSYSCONFIG /usr/local/texlive/texmf-config' \
-        'TEXMFSYSVAR /usr/local/texlive/texmf-var' \
-        'tlpdbopt_install_docfiles 0' \
-        'tlpdbopt_install_srcfiles 0' \
-        'tlpdbopt_autobackup 0' \
-        > /tmp/texlive.profile \
- && /tmp/install-tl/install-tl --profile=/tmp/texlive.profile \
- && ln -sfn "$(dirname "$(find /usr/local/texlive/bin -name tlmgr | head -n1)")" \
-            /usr/local/texlive/bin/current \
- && rm -rf /tmp/install-tl /tmp/install-tl.tar.gz
+# TeX Live is installed by docker/install-texlive.sh, see there for details.
+# TEXLIVE_YEAR pins the release: mirror.ctan.org always serves the latest release, so the build fails on purpose once
+# TeX Live moves on to a newer release. To keep building the old release, point TEXLIVE_REPOSITORY to the frozen
+# archive: https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/<year>/tlnet-final
+ARG TEXLIVE_YEAR=2026
+ARG TEXLIVE_REPOSITORY=https://mirror.ctan.org/systems/texlive/tlnet
 
 ENV PATH="/usr/local/texlive/bin/current:${PATH}"
-
-RUN tlmgr install \
-        latex latex-bin latexconfig l3kernel l3packages \
-        graphics graphics-cfg graphics-def graphics-pln \
-        clearsans fontaxes mweights \
-        lm \
-        pgf \
-        xcolor textpos ragged2e etoolbox ifmtarg parskip \
-        marvosym fontawesome geometry hyperref url \
-        xkeyval tools \
-        iftex infwarerr kvoptions kvsetkeys kvdefinekeys \
-        ltxcmds pdftexcmds hycolor letltxmacro bitset \
-        atbegshi atveryend refcount gettitlestring \
-        pdfescape stringenc etexcmds auxhook uniquecounter \
-        bigintcalc epstopdf-pkg psnfss \
- && tlmgr path add && fmtutil-sys --byengine pdftex \
- && rm -rf /usr/local/texlive/texmf-dist/doc \
-           /usr/local/texlive/texmf-dist/source
+RUN --mount=type=bind,source=docker/install-texlive.sh,target=/tmp/install-texlive.sh \
+    bash /tmp/install-texlive.sh
 
 WORKDIR /opt/app
 COPY pyproject.toml uv.lock ./
