@@ -10,8 +10,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget perl fontconfig git \
     && rm -rf /var/lib/apt/lists/*
 
+# TeX Live mirrors are occasionally unreachable or serve broken certificates, so network steps are retried
+# hadolint ignore=SC2016
+RUN printf '%s\n' \
+        '#!/bin/bash' \
+        'for attempt in 1 2 3 4 5; do' \
+        '    "$@" && exit 0' \
+        '    echo "attempt ${attempt}/5 failed: $*" >&2' \
+        '    sleep $((attempt * 10))' \
+        'done' \
+        'exit 1' \
+        > /usr/local/bin/retry \
+ && chmod +x /usr/local/bin/retry
+
 ENV PATH="/usr/local/texlive/bin:${PATH}"
-RUN wget -nv -O /tmp/install-tl.tar.gz \
+RUN retry wget -nv -O /tmp/install-tl.tar.gz \
         https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz \
  && mkdir /tmp/install-tl && tar -xzf /tmp/install-tl.tar.gz -C /tmp/install-tl --strip-components=1 \
  && printf '%s\n' \
@@ -24,14 +37,14 @@ RUN wget -nv -O /tmp/install-tl.tar.gz \
         'tlpdbopt_install_srcfiles 0' \
         'tlpdbopt_autobackup 0' \
         > /tmp/texlive.profile \
- && /tmp/install-tl/install-tl --profile=/tmp/texlive.profile \
+ && retry /tmp/install-tl/install-tl --profile=/tmp/texlive.profile \
  && ln -sfn "$(dirname "$(find /usr/local/texlive/bin -name tlmgr | head -n1)")" \
             /usr/local/texlive/bin/current \
  && rm -rf /tmp/install-tl /tmp/install-tl.tar.gz
 
 ENV PATH="/usr/local/texlive/bin/current:${PATH}"
 
-RUN tlmgr install \
+RUN retry tlmgr install \
         latex latex-bin latexconfig l3kernel l3packages \
         graphics graphics-cfg graphics-def graphics-pln \
         clearsans fontaxes mweights \
