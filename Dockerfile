@@ -19,7 +19,8 @@ COPY --chmod=755 docker/retry.sh /usr/local/bin/retry
 # https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/<year>/tlnet-final
 # install-tl and tlmgr run in the same layer so that the release check also covers the packages installed with tlmgr.
 # install-tl stores the mirror it picked as tlmgr's repository, so the repository is reset to let tlmgr retries switch
-# mirrors as well.
+# mirrors as well. Each install-tl attempt starts from an empty TEXDIR so that a retry does not build on a partial
+# install left behind by the failed attempt.
 ARG TEXLIVE_YEAR=2026
 ARG TEXLIVE_REPOSITORY=https://mirror.ctan.org/systems/texlive/tlnet
 
@@ -38,7 +39,7 @@ RUN retry wget -nv -O /tmp/install-tl.tar.gz "${TEXLIVE_REPOSITORY}/install-tl-u
         'tlpdbopt_install_srcfiles 0' \
         'tlpdbopt_autobackup 0' \
         > /tmp/texlive.profile \
- && retry /tmp/install-tl/install-tl --profile=/tmp/texlive.profile --repository "${TEXLIVE_REPOSITORY}" \
+ && retry bash -c "rm -rf /usr/local/texlive && /tmp/install-tl/install-tl --profile=/tmp/texlive.profile --repository '${TEXLIVE_REPOSITORY}'" \
  && ln -sfn "$(dirname "$(find /usr/local/texlive/bin -name tlmgr | head -n1)")" \
             /usr/local/texlive/bin/current \
  && rm -rf /tmp/install-tl /tmp/install-tl.tar.gz \
