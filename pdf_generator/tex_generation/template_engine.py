@@ -1,3 +1,4 @@
+import re
 import socket
 from base64 import decodebytes
 from collections import OrderedDict
@@ -55,6 +56,11 @@ def replace_special_characters(data):
         if character in data:
             data = data.replace(character, replacement)
     return data
+
+
+def allow_breaks(data):
+    # allows line breaks after separators in long words (e.g. device names without spaces); apply after filter_chars
+    return re.sub(r'(\\_|[./:-])', r'\1\\allowbreak{}', data)
 
 
 def decode_base64_to_file(base64_string, filename, directory, suffix='png'):
@@ -227,6 +233,7 @@ def _add_filters_to_jinja(environment):
     environment.filters['number_format'] = render_number_as_size
     environment.filters['nice_unix_time'] = render_unix_time
     environment.filters['filter_chars'] = replace_special_characters
+    environment.filters['allow_breaks'] = allow_breaks
     environment.filters['elements_count'] = len
     environment.filters['base64_to_png'] = decode_base64_to_file
     environment.filters['top_five'] = get_five_longest_entries

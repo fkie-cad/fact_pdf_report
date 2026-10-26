@@ -148,7 +148,7 @@
 
 		%------------------------------------------------
 
-		{\Huge\color{mainblue}\cvname}
+		\noindent\parbox{6cm}{\raggedright\LARGE\color{mainblue}\cvname}
 
 		%------------------------------------------------
 
