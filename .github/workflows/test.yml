@@ -5,6 +5,10 @@ on:
   # also build on master so that the Docker layer cache is available to pull requests (tests already ran on the PR)
   push:
     branches: [master]
+  # weekly build without cache: the cached TeX Live layer would otherwise hide a new TeX Live release (see TEXLIVE_YEAR
+  # in the Dockerfile) until a build without cache, e.g. of a release image, fails
+  schedule:
+    - cron: '0 4 * * 1'
 
 jobs:
   test:
@@ -21,9 +25,10 @@ jobs:
           context: .
           load: true
           tags: pdf-generator:test
+          no-cache: ${{ github.event_name == 'schedule' }}
           cache-from: type=gha
           # only master writes the cache: PRs can read it, and per-PR copies would evict it from the 10 GB cache limit
-          cache-to: ${{ github.event_name == 'push' && 'type=gha,mode=max' || '' }}
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
 
       - name: Run tests
         if: github.event_name != 'push'
